@@ -1,0 +1,12 @@
+{
+  "name": "vessel-tracker",
+  "version": "1.0.0",
+  "description": "Sledování lodí na vesselfinder.com",
+  "main": "vessel-tracker-script.js",
+  "scripts": {
+    "start": "node vessel-tracker-script.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0"
+  }
+}
