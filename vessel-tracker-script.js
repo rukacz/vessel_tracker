@@ -1,4 +1,4 @@
-// vessel-tracker.js
+// vessel-tracker-script.js
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
@@ -12,8 +12,14 @@ const vessels = [
 
 // Funkce pro získání dat o lodi
 async function getVesselData(vessel) {
-  const browser = await puppeteer.launch({ headless: "new" });
+  console.log(`Otevírám prohlížeč pro získání dat o lodi ${vessel.name}...`);
+  const browser = await puppeteer.launch({ 
+    headless: "new",
+    args: ['--no-sandbox', '--disable-setuid-sandbox']  // Nutné pro GitHub Actions
+  });
+  
   try {
+    console.log(`Vytvářím novou stránku pro ${vessel.name}...`);
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 800 });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
@@ -23,6 +29,7 @@ async function getVesselData(vessel) {
     console.log(`Načítám data pro loď ${vessel.name} z URL: ${url}`);
     
     await page.goto(url, { waitUntil: 'networkidle2' });
+    console.log(`Stránka pro ${vessel.name} byla načtena`);
     
     // Získání dat o lodi
     const vesselData = await page.evaluate(() => {
@@ -69,6 +76,8 @@ async function getVesselData(vessel) {
       };
     });
     
+    console.log(`Data pro ${vessel.name} úspěšně získána:`, JSON.stringify(vesselData).substring(0, 200) + '...');
+    
     return {
       ...vessel,
       ...vesselData
@@ -82,6 +91,7 @@ async function getVesselData(vessel) {
     };
   } finally {
     await browser.close();
+    console.log(`Prohlížeč pro ${vessel.name} zavřen`);
   }
 }
 
@@ -89,12 +99,16 @@ async function getVesselData(vessel) {
 async function trackVessels() {
   console.log('Začínám sledování lodí...');
   
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const dataDir = path.join(__dirname, 'data');
+  // Kontrola a vytvoření adresáře public
+  console.log('Pracovní adresář:', process.cwd());
+  const publicDir = path.join(process.cwd(), 'public');
+  console.log('Cesta k adresáři public:', publicDir);
   
-  // Vytvoření adresáře pro data, pokud neexistuje
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(publicDir)) {
+    console.log('Vytvářím adresář public...');
+    fs.mkdirSync(publicDir, { recursive: true });
+  } else {
+    console.log('Adresář public již existuje');
   }
   
   // Získání dat pro všechny lodě
@@ -102,57 +116,50 @@ async function trackVessels() {
   for (const vessel of vessels) {
     const data = await getVesselData(vessel);
     results.push(data);
-    
-    // Ukládání individuálních dat o lodi
-    fs.writeFileSync(
-      path.join(dataDir, `${vessel.name.replace(/ /g, '_')}_${timestamp}.json`),
-      JSON.stringify(data, null, 2)
-    );
   }
   
   // Ukládání souboru se všemi aktuálními daty
-  fs.writeFileSync(
-    path.join(dataDir, 'current_vessels.json'),
-    JSON.stringify(results, null, 2)
-  );
+  const currentDataFile = path.join(publicDir, 'current_vessels.json');
+  console.log(`Ukládám aktuální data do: ${currentDataFile}`);
+  fs.writeFileSync(currentDataFile, JSON.stringify(results, null, 2));
   
   // Ukládání historických dat
-  const historyFile = path.join(dataDir, 'vessels_history.json');
+  const historyFile = path.join(publicDir, 'vessels_history.json');
   let history = [];
   
   if (fs.existsSync(historyFile)) {
     try {
+      console.log(`Načítám existující historii z: ${historyFile}`);
       history = JSON.parse(fs.readFileSync(historyFile, 'utf8'));
     } catch (e) {
       console.error('Chyba při čtení historie:', e);
     }
   }
   
+  // Přidání nového záznamu
   history.push({
     timestamp: new Date().toISOString(),
     vessels: results
   });
   
+  console.log(`Ukládám aktualizovanou historii do: ${historyFile}`);
   fs.writeFileSync(historyFile, JSON.stringify(history, null, 2));
+  
+  // Vypsání obsahu adresáře pro kontrolu
+  console.log('Obsah adresáře public:');
+  const files = fs.readdirSync(publicDir);
+  console.log(files);
   
   console.log('Sledování lodí dokončeno. Data uložena.');
   return results;
 }
 
 // Spuštění sledování
-trackVessels().catch(console.error);
-
-// Plánované opakované spouštění (např. 2x denně)
-// Pokud chcete skript spouštět automaticky 2x denně, odkomentujte následující kód:
-/*
-const schedule = require('node-schedule');
-
-// Naplánování spuštění v 8:00 a 20:00 každý den
-schedule.scheduleJob('0 8,20 * * *', function() {
-  trackVessels().catch(console.error);
-});
-
-console.log('Skript pro sledování lodí je spuštěn a bude automaticky získávat data v 8:00 a 20:00.');
-*/
-
-module.exports = { trackVessels, getVesselData, vessels };
+trackVessels()
+  .then(() => {
+    console.log("Skript úspěšně dokončen");
+  })
+  .catch(error => {
+    console.error("Kritická chyba při běhu skriptu:", error);
+    process.exit(1);
+  });
