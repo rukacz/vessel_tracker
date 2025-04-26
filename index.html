@@ -250,90 +250,134 @@
         document.getElementById('inventory-link').href = 
             `https://docs.google.com/spreadsheets/d/${config.googleSheetId}/edit#gid=0`;
 
-        // Funkce pro načtení dat lodí podle konfigurace
-        async function loadVesselData() {
-            try {
-                let data;
-                
-                if (config.dataSource === 'github') {
-                    // Načtení dat z GitHub Pages
-                    const response = await fetch(`https://${config.githubUser}.github.io/${config.githubRepo}/public/current_vessels.json`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    data = await response.json();
-                } 
-                else if (config.dataSource === 'jsonbin') {
-                    // Načtení dat z JSONBin.io (veřejné API)
-                    const response = await fetch(`https://api.jsonbin.io/v3/b/${config.jsonbinCurrentId}/latest`);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    const result = await response.json();
-                    data = result.record;
-                }
-                else {
-                    // Pro účely testování použijeme simulovaná data
-                    data = [
-                        {
-                            name: 'FLAMINGO 1',
-                            imo: '9474199',
-                            mmsi: '352002503',
-                            position: { lat: 35.4562, lon: 24.8721 },
-                            status: 'Underway using engine',
-                            destination: 'Koper, Slovenia',
-                            eta: '2025-05-15 08:30',
-                            course: '245° / 12.5 kn',
-                            lastUpdate: '2025-04-25T09:15:23Z'
-                        },
-                        {
-                            name: 'PELIKAN',
-                            imo: '9474280',
-                            mmsi: '352003347',
-                            position: { lat: 41.9812, lon: 19.3742 },
-                            status: 'Underway using engine',
-                            destination: 'Rijeka, Croatia',
-                            eta: '2025-05-22 13:45',
-                            course: '320° / 10.2 kn',
-                            lastUpdate: '2025-04-25T09:15:23Z'
-                        },
-                        {
-                            name: 'HARMONY',
-                            imo: '9449522',
-                            mmsi: '352003307',
-                            position: { lat: 44.3642, lon: 33.7923 },
-                            status: 'Underway using engine',
-                            destination: 'Constanta, Romania',
-                            eta: '2025-05-18 22:15',
-                            course: '190° / 11.7 kn',
-                            lastUpdate: '2025-04-25T09:15:23Z'
-                        }
-                    ];
-                }
-                
-                // Aktualizace dat a mapy
-                updateVesselInfo(data);
-                updateMap(data);
-                
-                // Aktualizace času poslední aktualizace
-                const lastUpdateElement = document.getElementById('last-update');
-                const updateDate = new Date(data[0].lastUpdate);
-                lastUpdateElement.textContent = `Poslední aktualizace: ${updateDate.toLocaleString('cs-CZ')}`;
-                
-                return true;
-            } catch (error) {
-                console.error('Chyba při načítání dat lodí:', error);
-                
-                // Zobrazení chybové zprávy uživateli
-                const mapContainer = document.querySelector('.map-container');
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.textContent = `Nepodařilo se načíst aktuální data lodí. Zkuste to prosím později. (${error.message})`;
-                mapContainer.insertBefore(errorDiv, mapContainer.firstChild);
-                
-                return false;
+// Funkce pro načtení dat lodí podle konfigurace
+async function loadVesselData() {
+    try {
+        let data;
+        
+        if (config.dataSource === 'github') {
+            // Načtení dat z GitHub Pages - opravená cesta k souborům
+            const url = `https://${config.githubUser}.github.io/${config.githubRepo}/public/current_vessels.json`;
+            console.log('Načítám data z URL:', url);
+            
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            data = await response.json();
+            console.log('Načtená data:', data);
+        } 
+        else if (config.dataSource === 'jsonbin') {
+            // Načtení dat z JSONBin.io (veřejné API)
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${config.jsonbinCurrentId}/latest`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const result = await response.json();
+            data = result.record;
         }
+        else {
+            // Pro účely testování použijeme simulovaná data
+            data = [
+                {
+                    name: 'FLAMINGO 1',
+                    imo: '9474199',
+                    mmsi: '352002503',
+                    position: { lat: 35.4562, lon: 24.8721 },
+                    status: 'Underway using engine',
+                    destination: 'Koper, Slovenia',
+                    eta: '2025-05-15 08:30',
+                    course: '245° / 12.5 kn',
+                    lastUpdate: '2025-04-25T09:15:23Z'
+                },
+                {
+                    name: 'PELIKAN',
+                    imo: '9474280',
+                    mmsi: '352003347',
+                    position: { lat: 41.9812, lon: 19.3742 },
+                    status: 'Underway using engine',
+                    destination: 'Rijeka, Croatia',
+                    eta: '2025-05-22 13:45',
+                    course: '320° / 10.2 kn',
+                    lastUpdate: '2025-04-25T09:15:23Z'
+                },
+                {
+                    name: 'HARMONY',
+                    imo: '9449522',
+                    mmsi: '352003307',
+                    position: { lat: 44.3642, lon: 33.7923 },
+                    status: 'Underway using engine',
+                    destination: 'Constanta, Romania',
+                    eta: '2025-05-18 22:15',
+                    course: '190° / 11.7 kn',
+                    lastUpdate: '2025-04-25T09:15:23Z'
+                }
+            ];
+        }
+        
+        // Aktualizace dat a mapy
+        updateVesselInfo(data);
+        updateMap(data);
+        
+        // Aktualizace času poslední aktualizace
+        const lastUpdateElement = document.getElementById('last-update');
+        const updateDate = new Date(data[0].lastUpdate);
+        lastUpdateElement.textContent = `Poslední aktualizace: ${updateDate.toLocaleString('cs-CZ')}`;
+        
+        return true;
+    } catch (error) {
+        console.error('Chyba při načítání dat lodí:', error);
+        
+        // Zobrazení chybové zprávy uživateli
+        const mapContainer = document.querySelector('.map-container');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = `Nepodařilo se načíst aktuální data lodí. Zkuste to prosím později. (${error.message})`;
+        mapContainer.insertBefore(errorDiv, mapContainer.firstChild);
+        
+        // Použijeme záložní data
+        const fallbackData = [
+            {
+                name: 'FLAMINGO 1',
+                imo: '9474199',
+                mmsi: '352002503',
+                position: { lat: 35.4562, lon: 24.8721 },
+                status: 'Underway using engine',
+                destination: 'Koper, Slovenia',
+                eta: '2025-05-15 08:30',
+                course: '245° / 12.5 kn',
+                lastUpdate: '2025-04-25T09:15:23Z'
+            },
+            {
+                name: 'PELIKAN',
+                imo: '9474280',
+                mmsi: '352003347',
+                position: { lat: 41.9812, lon: 19.3742 },
+                status: 'Underway using engine',
+                destination: 'Rijeka, Croatia',
+                eta: '2025-05-22 13:45',
+                course: '320° / 10.2 kn',
+                lastUpdate: '2025-04-25T09:15:23Z'
+            },
+            {
+                name: 'HARMONY',
+                imo: '9449522',
+                mmsi: '352003307',
+                position: { lat: 44.3642, lon: 33.7923 },
+                status: 'Underway using engine',
+                destination: 'Constanta, Romania',
+                eta: '2025-05-18 22:15',
+                course: '190° / 11.7 kn',
+                lastUpdate: '2025-04-25T09:15:23Z'
+            }
+        ];
+        
+        updateVesselInfo(fallbackData);
+        updateMap(fallbackData);
+        
+        return false;
+    }
+}
 
         // Funkce pro načtení dat o zásobách z Google Sheets
         async function loadInventoryData() {
