@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Umožňuje ruční spuštění
 
 permissions:
-  contents: write  # Explicitní povolení pro zápis do obsahu repozitáře
+  contents: write  # Explicitní povolení pro zápis do obsahu repozitáře, a tak dal
 
 jobs:
   track-vessels:
