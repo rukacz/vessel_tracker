@@ -1,4 +1,4 @@
-name: Vessel Tracking
+  name: Vessel Tracking
 
 on:
   schedule:
@@ -135,6 +135,19 @@ jobs:
         run: |
           echo "Obsah adresáře public:"
           ls -la public || echo "Public adresář neexistuje nebo je prázdný"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install
+
+      - name: Run MarineTraffic Scraper
+        run: python marinetraffic_scraper.py
         
       - name: Commit and push if there are changes
         run: |
