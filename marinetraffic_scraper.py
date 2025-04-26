@@ -19,6 +19,7 @@ def get_ship_position(url):
 if __name__ == "__main__":
     url = "https://www.marinetraffic.com/en/ais/details/ships/shipid:689445/mmsi:352002503/imo:9474199/vessel:FLAMINGO_1"
     html = get_ship_position(url)
-    with open("output.html", "w", encoding="utf-8") as f:
-        f.write(html)
+    with open("public/current_vessels.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
     print("Stránka stažena.")
