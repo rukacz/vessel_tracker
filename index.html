@@ -298,56 +298,66 @@
                 });
             }
 
-            // Funkce pro aktualizaci pozic na mapě
-            function updateMap(data) {
-                console.log('Aktualizuji pozice na mapě...');
-                // Hranice pro zoom
-                const bounds = L.latLngBounds();
-                
-                data.forEach(vessel => {
-                    const { lat, lon } = vessel.position || {};
-                    if (!lat || !lon) return;
-                    
-                    const position = L.latLng(parseFloat(lat), parseFloat(lon));
-                    bounds.extend(position);
-                    
-                    // Vyhledání konfigurace pro tuto loď
-                    const vesselConfig = vessels.find(v => v.name === vessel.name);
-                    
-                    // Pokud již existuje marker, aktualizujeme jeho pozici
-                    if (vesselMarkers[vessel.name]) {
-                        vesselMarkers[vessel.name].setLatLng(position);
-                    } else {
-                        // Jinak vytvoříme nový marker
-                        const shipIcon = L.divIcon({
-                            html: `<div style="color: ${vesselConfig.color}; font-size: 24px;">⚓</div>`,
-                            className: 'ship-marker',
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 15]
-                        });
-                        
-                        const marker = L.marker(position, { icon: shipIcon })
-                            .addTo(map)
-                            .bindPopup(`
-                                <div class="popup-content">
-                                    <h3>${vessel.name}</h3>
-                                    <p>IMO: ${vessel.imo}</p>
-                                    <p>Status: ${vessel.status || 'Neznámý'}</p>
-                                    <p>Cíl: ${vessel.destination || 'Neznámý'}</p>
-                                    <p>ETA: ${vessel.eta || 'Nedostupné'}</p>
-                                    <p>Kurz/Rychlost: ${vessel.course || 'Nedostupné'}</p>
-                                </div>
-                            `);
-                        
-                        vesselMarkers[vessel.name] = marker;
-                    }
-                });
-                
-                // Přiblížení mapy na všechny lodě
-                if (!bounds.isEmpty()) {
-                    map.fitBounds(bounds, { padding: [50, 50] });
-                }
-            }
+// Funkce pro aktualizaci pozic na mapě s opravou pro bounds.isEmpty
+function updateMap(data) {
+    console.log('Aktualizuji pozice na mapě...');
+    
+    // Vytvoření hranice pro zoom - oprava chyby bounds.isEmpty
+    const bounds = L.latLngBounds();
+    let hasValidPositions = false;  // Příznak, zda máme alespoň jednu platnou pozici
+    
+    data.forEach(vessel => {
+        const { lat, lon } = vessel.position || {};
+        if (!lat || !lon) return;
+        
+        const position = L.latLng(parseFloat(lat), parseFloat(lon));
+        bounds.extend(position);
+        hasValidPositions = true;  // Našli jsme alespoň jednu platnou pozici
+        
+        // Vyhledání konfigurace pro tuto loď
+        const vesselConfig = vessels.find(v => v.name === vessel.name) || 
+                             { color: '#1a4f8a' };  // Výchozí barva, pokud konfigurace není nalezena
+        
+        // Pokud již existuje marker, aktualizujeme jeho pozici
+        if (vesselMarkers[vessel.name]) {
+            vesselMarkers[vessel.name].setLatLng(position);
+        } else {
+            // Jinak vytvoříme nový marker
+            const shipIcon = L.divIcon({
+                html: `<div style="color: ${vesselConfig.color}; font-size: 24px;">⚓</div>`,
+                className: 'ship-marker',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            const marker = L.marker(position, { icon: shipIcon })
+                .addTo(map)
+                .bindPopup(`
+                    <div class="popup-content">
+                        <h3>${vessel.name}</h3>
+                        <p>IMO: ${vessel.imo}</p>
+                        <p>Status: ${vessel.status || 'Neznámý'}</p>
+                        <p>Cíl: ${vessel.destination || 'Neznámý'}</p>
+                        <p>ETA: ${vessel.eta || 'Nedostupné'}</p>
+                        <p>Kurz/Rychlost: ${vessel.course || 'Nedostupné'}</p>
+                    </div>
+                `);
+            
+            vesselMarkers[vessel.name] = marker;
+        }
+    });
+    
+    // Přiblížení mapy na všechny lodě - oprava chyby bounds.isEmpty
+    if (hasValidPositions) {
+        try {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        } catch (error) {
+            console.error('Chyba při nastavování hranic mapy:', error);
+            // Záložní řešení - nastavíme výchozí pohled na mapu
+            map.setView([40, 20], 5);
+        }
+    }
+}
 
             // Funkce pro načítání dat lodí - POUŽIJE STATICKÁ DATA
             function loadVesselData() {
