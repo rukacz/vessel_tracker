@@ -1,4 +1,4 @@
-  name: Vessel Tracking
+name: Vessel Tracking
 
 on:
   schedule:
