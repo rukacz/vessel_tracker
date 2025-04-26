@@ -1,0 +1,40 @@
+[
+  {
+    "timestamp": "2025-04-26T09:15:23Z",
+    "vessels": [
+      {
+        "name": "FLAMINGO 1",
+        "imo": "9474199",
+        "mmsi": "352002503",
+        "position": { "lat": 35.4562, "lon": 24.8721 },
+        "status": "Underway using engine",
+        "destination": "Koper, Slovenia",
+        "eta": "2025-05-15 08:30",
+        "course": "245° / 12.5 kn",
+        "lastUpdate": "2025-04-26T09:15:23Z"
+      },
+      {
+        "name": "PELIKAN",
+        "imo": "9474280",
+        "mmsi": "352003347",
+        "position": { "lat": 41.9812, "lon": 19.3742 },
+        "status": "Underway using engine",
+        "destination": "Rijeka, Croatia",
+        "eta": "2025-05-22 13:45",
+        "course": "320° / 10.2 kn",
+        "lastUpdate": "2025-04-26T09:15:23Z"
+      },
+      {
+        "name": "HARMONY",
+        "imo": "9449522",
+        "mmsi": "352003307",
+        "position": { "lat": 44.3642, "lon": 33.7923 },
+        "status": "Underway using engine",
+        "destination": "Constanta, Romania",
+        "eta": "2025-05-18 22:15",
+        "course": "190° / 11.7 kn",
+        "lastUpdate": "2025-04-26T09:15:23Z"
+      }
+    ]
+  }
+]
