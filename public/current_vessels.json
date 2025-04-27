@@ -3,21 +3,33 @@
     "name": "FLAMINGO 1",
     "imo": "9474199",
     "mmsi": "352002503",
-    "error": "Locator.text_content: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"//td[contains(text(), 'Destination')]/following-sibling::td\").first\n",
+    "position": null,
+    "status": "N/A",
+    "destination": "N/A",
+    "eta": "N/A",
+    "course": "N/A",
     "lastUpdate": "2025-04-26T20:00:00Z"
   },
   {
     "name": "PELIKAN",
     "imo": "9474280",
     "mmsi": "352003347",
-    "error": "Locator.text_content: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"//td[contains(text(), 'Destination')]/following-sibling::td\").first\n",
+    "position": null,
+    "status": "N/A",
+    "destination": "N/A",
+    "eta": "N/A",
+    "course": "N/A",
     "lastUpdate": "2025-04-26T20:00:00Z"
   },
   {
     "name": "HARMONY",
     "imo": "9449522",
     "mmsi": "352003307",
-    "error": "Locator.text_content: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"//td[contains(text(), 'Destination')]/following-sibling::td\").first\n",
+    "position": null,
+    "status": "N/A",
+    "destination": "N/A",
+    "eta": "N/A",
+    "course": "N/A",
     "lastUpdate": "2025-04-26T20:00:00Z"
   }
 ]
