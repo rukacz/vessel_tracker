@@ -23,7 +23,17 @@ vessels = [
         "url": "https://www.marinetraffic.com/en/ais/details/ships/shipid:415530/mmsi:352003307/imo:9449522/vessel:HARMONY"
     }
 ]
-
+def get_safe_text(page, xpath, label):
+    try:
+        elem = page.locator(f"xpath=//td[contains(text(), '{label}')]/following-sibling::td").first
+        if elem.is_visible():
+            text = elem.text_content()
+            return text.strip() if text else "N/A"
+        else:
+            return "N/A"
+    except:
+        return "N/A"
+        
 def get_vessel_data(page, vessel):
     print(f"Načítám data pro loď: {vessel['name']}")
     page.goto(vessel['url'], timeout=60000)
