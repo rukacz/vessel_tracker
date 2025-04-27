@@ -1,9 +1,29 @@
-{
-  "ship": "FLAMINGO 1",
-  "position": {
-    "lat": 35.1234,
-    "lon": 25.5678
+[
+  {
+    "ship": "FLAMINGO 1",
+    "position": {
+      "lat": 35.1234,
+      "lon": 25.5678
+    },
+    "status": "Underway",
+    "timestamp": "2025-04-26T20:00:00Z"
   },
-  "status": "Underway",
-  "timestamp": "2025-04-26T20:00:00Z"
-}
+  {
+    "ship": "PELIKAN",
+    "position": {
+      "lat": 41.5678,
+      "lon": 19.789
+    },
+    "status": "Moored",
+    "timestamp": "2025-04-26T20:00:00Z"
+  },
+  {
+    "ship": "HARMONY",
+    "position": {
+      "lat": 44.1234,
+      "lon": 33.5678
+    },
+    "status": "At anchor",
+    "timestamp": "2025-04-26T20:00:00Z"
+  }
+]
