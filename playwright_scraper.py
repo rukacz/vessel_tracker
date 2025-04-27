@@ -47,9 +47,9 @@ def get_vessel_data(page, vessel):
         lon = lon_elem.get_attribute('content') if lon_elem else None
 
         status = page.query_selector(".vfix-top").inner_text().strip() if page.query_selector(".vfix-top") else "N/A"
-        destination = page.locator("xpath=//td[contains(text(), 'Destination')]/following-sibling::td").first.text_content() or "N/A"
-        eta = page.locator("xpath=//td[contains(text(), 'ETA')]/following-sibling::td").first.text_content() or "N/A"
-        course = page.locator("xpath=//td[contains(text(), 'Course / Speed')]/following-sibling::td").first.text_content() or "N/A"
+        destination = get_safe_text(page, "//td", "Destination")
+        eta = get_safe_text(page, "//td", "ETA")
+        course = get_safe_text(page, "//td", "Course / Speed")
 
         return {
             "name": vessel["name"],
