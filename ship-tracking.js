@@ -69,9 +69,19 @@ const materialsData = [
 let map;
 let shipMarkers = {};
 
+// Funkce volaná po načtení DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  
+  // Aktualizace grafu, pokud je k dispozici
+  if (window.updateInventoryChart) {
+    window.updateInventoryChart(materialsData);
+  }
+});
+
 function initMap() {
-  // Nastavení základní mapy se zaměřením na Evropu
-  map = L.map('map').setView([42.0, 25.0], 5);
+  // Nastavení základní mapy se zaměřením zahrnujícím Evropu a Blízký východ
+  map = L.map('map').setView([40.0, 40.0], 4);
   
   // Přidání tile vrstvy - OpenStreetMap
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -109,6 +119,8 @@ function displayShips() {
         <h3>${ship.name}</h3>
         <p><strong>${ship.imo}</strong></p>
         <p><strong>Status:</strong> ${ship.status}</p>
+        <p><strong>Cargo:</strong> ${ship.cargo}</p>
+        <p><strong>Loading port:</strong> ${ship.loadingPort}</p>
         <p><strong>Destination:</strong> ${ship.destination}</p>
         <p><strong>ETA:</strong> ${ship.eta}</p>
         <p><strong>Course/Speed:</strong> ${ship.course}° / ${ship.speed} knots</p>
@@ -117,6 +129,14 @@ function displayShips() {
     
     // Přidání popup k markeru
     marker.bindPopup(popupContent);
+    
+    // Přidání popisku (tooltip) ke každé lodi, který se zobrazí při najetí myší
+    marker.bindTooltip(ship.name, {
+      permanent: true,
+      direction: 'top',
+      className: 'ship-tooltip',
+      offset: [0, -10]
+    });
     
     // Uložení markeru pro pozdější použití
     shipMarkers[ship.name] = marker;
@@ -153,6 +173,34 @@ function updateShipCards() {
       });
       
       shipCardsContainer.appendChild(shipCard);
+    });
+  }
+  
+  // Vytvoříme samostatný kontejner pro informace pod mapou
+  const shipInfoContainer = document.getElementById('ship-info-container');
+  if (shipInfoContainer) {
+    shipInfoContainer.innerHTML = '';
+    
+    // Vytvoření informačního boxu pro každou loď, který bude vždy viditelný
+    shipsData.forEach(ship => {
+      const infoBox = document.createElement('div');
+      infoBox.className = 'ship-info-box';
+      infoBox.style.borderColor = ship.color;
+      
+      infoBox.innerHTML = `
+        <h4>${ship.name}</h4>
+        <p><strong>Status:</strong> ${ship.status}</p>
+        <p><strong>Destination:</strong> ${ship.destination}</p>
+        <p><strong>ETA:</strong> ${ship.eta}</p>
+      `;
+      
+      // Přidání události kliknutí pro centrování mapy na danou loď
+      infoBox.addEventListener('click', () => {
+        map.setView(ship.position, 8);
+        shipMarkers[ship.name].openPopup();
+      });
+      
+      shipInfoContainer.appendChild(infoBox);
     });
   }
 }
@@ -200,76 +248,3 @@ function fillInventoryTable() {
     inventoryTable.appendChild(tableBody);
   }
 }
-
-// CSS styly pro aplikaci
-function addCustomStyles() {
-  const styleElement = document.createElement('style');
-  styleElement.textContent = `
-    .ship-card {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 15px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    
-    .ship-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    
-    .ship-popup h3 {
-      margin-top: 0;
-      margin-bottom: 5px;
-    }
-    
-    .ship-popup p {
-      margin: 5px 0;
-    }
-    
-    .ship-tooltip {
-      background-color: rgba(0, 0, 0, 0.7);
-      border: none;
-      border-radius: 3px;
-      color: white;
-      font-weight: bold;
-      padding: 3px 8px;
-      white-space: nowrap;
-    }
-    
-    #inventory-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    
-    #inventory-table th, #inventory-table td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    
-    #inventory-table th {
-      background-color: #f2f2f2;
-      font-weight: bold;
-    }
-    
-    #inventory-table tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    
-    #inventory-table tr:hover {
-      background-color: #f0f0f0;
-    }
-  `;
-  
-  document.head.appendChild(styleElement);
-}
-
-// Inicializace aplikace po načtení stránky
-document.addEventListener('DOMContentLoaded', () => {
-  addCustomStyles();
-  initMap();
-});
