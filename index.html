@@ -433,16 +433,28 @@
     }
 }
 
-.inventory-graph-container {
-    margin: 20px 0;
+.inventory-graph-container, 
+.inventory-timeline-container {
+    margin: 20px 0 30px 0;
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .inventory-graph {
     max-width: 100%;
     height: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 30px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Responzivní styly */
+@media screen and (max-width: 768px) {
+    .inventory-graph-container, 
+    .inventory-timeline-container {
+        padding: 10px;
+    }
 }
         
     </style>
