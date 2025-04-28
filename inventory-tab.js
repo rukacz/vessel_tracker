@@ -5,9 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initPeriodTabs();
 });
 
-/**
- * Inicializace přepínačů kritických období
- */
+// Funkce pro přepínání mezi kritickými obdobími
 function initPeriodTabs() {
     // Získáme všechny přepínače období
     const periodTabs = document.querySelectorAll('.period-tab');
