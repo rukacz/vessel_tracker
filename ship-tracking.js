@@ -229,6 +229,16 @@ function addCustomStyles() {
       margin: 5px 0;
     }
     
+    .ship-tooltip {
+      background-color: rgba(0, 0, 0, 0.7);
+      border: none;
+      border-radius: 3px;
+      color: white;
+      font-weight: bold;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    
     #inventory-table {
       width: 100%;
       border-collapse: collapse;
