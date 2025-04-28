@@ -3,1014 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sledování lodí a kritických období zásobování</title>
+    <title>Sledování lodí a stavu zásob</title>
+    
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f5f7fa;
-            color: #333;
         }
-        .container {
-            max-width: 1400px;
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
         header {
-            background-color: #1a4f8a;
+            background-color: #0a4d70;
             color: white;
-            padding: 1rem;
+            padding: 20px;
             text-align: center;
             margin-bottom: 20px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        header h1 {
-            margin: 0;
         }
         .tabs {
             display: flex;
             margin-bottom: 20px;
-            border-bottom: 2px solid #ddd;
+            border-bottom: 1px solid #ddd;
         }
-        .tab {
+        .tab-button {
             padding: 10px 20px;
-            background-color: #f2f2f2;
-            border: 1px solid #ddd;
-            border-bottom: none;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: none;
             border-radius: 5px 5px 0 0;
             margin-right: 5px;
-            cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
         }
-        .tab.active {
-            background-color: #1a4f8a;
+        .tab-button.active {
+            background-color: #0a4d70;
             color: white;
-            border-color: #1a4f8a;
         }
         .tab-content {
             display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
         }
         .tab-content.active {
             display: block;
         }
-        .main-content {
+        #map {
+            height: 500px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .ship-cards {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-        .map-container {
-            flex: 1 1 700px;
-            /* Bez čárky na konci */
-        }
-
-        #map {
-            height: 500px; /* Přidejte explicitní výšku pro div s ID "map" */
-            width: 100%;
-        }
-        .inventory-container {
-            flex: 1 1 400px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 20px;
-        }
-        #map {
-            height: 600px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .dashboard {
-            margin-top: 20px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 20px;
-        }
-        .vessel-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
             margin-bottom: 20px;
         }
-        .vessel-card {
-            flex: 1 1 300px;
-            background-color: #f9f9f9;
-            border-left: 5px solid #1a4f8a;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .vessel-card h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            color: #1a4f8a;
-        }
-        .vessel-card p {
-            margin: 5px 0;
-        }
-        .vessel-card.flamingo { border-left-color: #ff7043; }
-        .vessel-card.pelikan { border-left-color: #42a5f5; }
-        .vessel-card.harmony { border-left-color: #66bb6a; }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table th {
-            background-color: #f2f2f2;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
-        }
-        table td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .status-low {
-            color: #f44336;
-            font-weight: bold;
-        }
-        .status-medium {
-            color: #ff9800;
-        }
-        .status-high {
-            color: #4caf50;
-        }
-        .update-info {
-            margin-top: 10px;
-            text-align: right;
-            font-size: 0.8rem;
-            color: #666;
-        }
-        .vessel-info {
-            margin-bottom: 15px;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-style: italic;
-            color: #666;
-        }
-        .error-message {
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin-bottom: 30px;
-        }
-        .alert-card {
-            background-color: #fff3e0;
-            border-left: 5px solid #ff9800;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .alert-card.critical {
-            background-color: #ffebee;
-            border-left-color: #f44336;
-        }
-        .alert-card h3 {
-            margin-top: 0;
-            color: #e65100;
-        }
-        .alert-card.critical h3 {
-            color: #c62828;
-        }
-        .period-selector {
-            display: flex;
-            margin-bottom: 20px;
-            background-color: #f2f2f2;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .period-button {
+        .ship-card {
             flex: 1;
-            padding: 10px;
-            text-align: center;
-            background-color: #f2f2f2;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
+            min-width: 250px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .period-button.active {
-            background-color: #1a4f8a;
-            color: white;
-        }
-        .period-content {
-            display: none;
-        }
-        .period-content.active {
-            display: block;
+        #inventory-chart {
+            height: 400px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         .timeline {
-            position: relative;
-            margin: 30px 0;
-            padding-left: 30px;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background-color: #ddd;
-            border-radius: 2px;
-        }
-        .timeline-item {
-            position: relative;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px dashed #eee;
-        }
-        .timeline-item:last-child {
-            border-bottom: none;
-        }
-        .timeline-date {
-            position: absolute;
-            left: -45px;
-            background-color: #1a4f8a;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .timeline-icon {
-            position: absolute;
-            left: -30px;
-            width: 30px;
-            height: 30px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid #1a4f8a;
-            color: #1a4f8a;
-            font-size: 1.2rem;
-        }
-        .timeline-content {
-            background-color: white;
-            padding: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .timeline-title {
-            margin-top: 0;
-            color: #1a4f8a;
-        }
-        .critical-bar {
-            background-color: rgba(244, 67, 54, 0.2);
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            z-index: 1;
-        }
-        .risk-indicator {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        .risk-high {
-            background-color: #f44336;
-            color: white;
-        }
-        .risk-medium {
-            background-color: #ff9800;
-            color: white;
-        }
-        .risk-low {
-            background-color: #4caf50;
-            color: white;
-        }
-        .status-metric {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .status-metric-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-        .metric-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .metric-card {
-            flex: 1 1 200px;
-            background-color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .metric-card h4 {
-            margin-top: 0;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .metric-card.danger .metric-value {
-            color: #f44336;
-        }
-        .metric-card.warning .metric-value {
-            color: #ff9800;
-        }
-        .metric-card.success .metric-value {
-            color: #4caf50;
-        }
-        .metric-change {
-            font-size: 0.9rem;
-        }
-        .metric-change.positive {
-            color: #4caf50;
-        }
-        .metric-change.negative {
-            color: #f44336;
-        }
-        
-        @media (max-width: 768px) {
-            .vessel-card {
-                flex: 1 1 100%;
-            }
-            .tab {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Sledování lodí a kritických období zásobování</h1>
-        </header>
-        
-        <div class="tabs">
-            <div class="tab active" data-tab="ships" onclick="switchTab('ships')">Aktuální poloha lodí</div>
-            <div class="tab" data-tab="critical" onclick="switchTab('critical')">Kritická období</div>
-        </div>
-        
-        <script>
-            // Přímá funkce pro přepínání záložek
-            function switchTab(tabId) {
-                console.log('Switching to tab:', tabId);
-                
-                // Deaktivace všech záložek a obsahů
-                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-                
-                // Aktivace vybrané záložky a obsahu
-                document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-                document.getElementById(tabId + '-tab').classList.add('active');
-                
-                // Pokud je to záložka s grafem, obnovíme graf
-                if (tabId === 'critical' && window.inventoryChart) {
-                    window.inventoryChart.update();
-                }
-            }
-        </script>
-        
-        <div id="ships-tab" class="tab-content active">
-            <div class="main-content">
-                <div class="map-container">
-                    <div id="map"></div>
-                    
-                    <div class="dashboard">
-                        <h2>Aktuální poloha lodí</h2>
-                        <div class="vessel-info">
-                            <div class="vessel-card flamingo">
-                                <h3>FLAMINGO 1</h3>
-                                <p id="flamingo-1-position">Pozice: Načítání...</p>
-                                <p id="flamingo-1-status">Status: Načítání...</p>
-                                <p id="flamingo-1-destination">Cíl: Načítání...</p>
-                                <p id="flamingo-1-eta">ETA: Načítání...</p>
-                            </div>
-                            
-                            <div class="vessel-card pelikan">
-                                <h3>PELIKAN</h3>
-                                <p id="pelikan-position">Pozice: Načítání...</p>
-                                <p id="pelikan-status">Status: Načítání...</p>
-                                <p id="pelikan-destination">Cíl: Načítání...</p>
-                                <p id="pelikan-eta">ETA: Načítání...</p>
-                            </div>
-                            
-                            <div class="vessel-card harmony">
-                                <h3>HARMONY</h3>
-                                <p id="harmony-position">Pozice: Načítání...</p>
-                                <p id="harmony-status">Status: Načítání...</p>
-                                <p id="harmony-destination">Cíl: Načítání...</p>
-                                <p id="harmony-eta">ETA: Načítání...</p>
-                            </div>
-                        </div>
-                        <div class="update-info" id="last-update">
-                            Poslední aktualizace: --
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="critical-tab" class="tab-content">
-            <div class="alert-card critical">
-                <h3><i class="fas fa-exclamation-triangle"></i> Upozornění: Riziko zastavení výroby</h3>
-                <p>Identifikována dvě kritická období, kdy stav zásob klesá pod úroveň 6 000 tun, což je minimální bezpečná hladina pro zajištění plynulého provozu výroby.</p>
-            </div>
-            
-            <div class="period-selector">
-                <button class="period-button active" data-period="w17">Kritické období A (W17)</button>
-                <button class="period-button" data-period="w23">Kritické období B (W23)</button>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="inventory-chart"></canvas>
-            </div>
-            
-            <div id="period-w17" class="period-content active">
-                <div class="metric-container">
-                    <div class="metric-card danger">
-                        <h4>Minimální stav zásob</h4>
-                        <div class="metric-value">2 713 tun</div>
-                        <div class="metric-change negative">-54.8% oproti bezpečné úrovni</div>
-                    </div>
-                    <div class="metric-card warning">
-                        <h4>Datum kritického stavu</h4>
-                        <div class="metric-value">21.4.2025</div>
-                        <div class="metric-change">Týden W17</div>
-                    </div>
-                    <div class="metric-card">
-                        <h4>Potřebné pro bezpečný provoz</h4>
-                        <div class="metric-value">6 000 tun</div>
-                        <div class="metric-change">Minimum pro plynulou výrobu</div>
-                    </div>
-                </div>
-                
-                <div class="alert-card critical">
-                    <h3>Analýza rizika - Týden W17</h3>
-                    <p>V týdnu W17 dochází k velmi kritickému poklesu zásob bram na pouhých 2 713 tun, což je hluboko pod minimální bezpečnou úrovní 6 000 tun. Tento stav nastává z důvodu zpoždění dodávek z lodi HARMONY (Hadeed III), která má předpokládanou ETA v přístavu 30.4.2025.</p>
-                    <p>Situace vyžaduje okamžitou akci:</p>
-                    <ul>
-                        <li>Zkrácení výrobního plánu a snížení výkonu</li>
-                        <li>Urychlení železniční dopravy zbývajícího materiálu z přístavu</li>
-                        <li>Příprava alternativních dodavatelů</li>
-                    </ul>
-                </div>
-                
-                <h3>Časová osa dodávek - Období A</h3>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Evraz 3 - Příjezd do přístavu Gdynia</h4>
-                            <p>Loď SAKAR dorazila do přístavu Gdynia s nákladem 20 900 tun bram.</p>
-                            <p><strong>Datum:</strong> 29.3.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Transport do Ostravy - První část</h4>
-                            <p>První transport materiálu z přístavu Gdynia do Ostravy - 3 000 tun.</p>
-                            <p><strong>Datum:</strong> 14.4.2025 - 16.4.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Transport do Ostravy - Druhá část</h4>
-                            <p>Druhý transport materiálu z přístavu Gdynia do Ostravy - 3 000 tun.</p>
-                            <p><strong>Datum:</strong> 17.4.2025 - 19.4.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
-                            <p>Stav zásob klesá na kritických 2 713 tun, což ohrožuje kontinuitu výroby.</p>
-                            <p><strong>Datum:</strong> 21.4.2025 (Týden W17)</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Transport do Ostravy - Třetí část</h4>
-                            <p>Třetí transport materiálu z přístavu Gdynia do Ostravy - 3 000 tun.</p>
-                            <p><strong>Datum:</strong> 19.4.2025 - 21.4.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Hadeed III - Očekávaný příjezd</h4>
-                            <p>Loď HARMONY s nákladem Hadeed III má dorazit do přístavu. Tato dodávka je klíčová pro překonání kritického období.</p>
-                            <p><strong>Datum (ETA):</strong> 30.4.2025</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="period-w23" class="period-content">
-                <div class="metric-container">
-                    <div class="metric-card danger">
-                        <h4>Minimální stav zásob</h4>
-                        <div class="metric-value">2 784 tun</div>
-                        <div class="metric-change negative">-53.6% oproti bezpečné úrovni</div>
-                    </div>
-                    <div class="metric-card warning">
-                        <h4>Datum kritického stavu</h4>
-                        <div class="metric-value">2.6.2025</div>
-                        <div class="metric-change">Týden W23</div>
-                    </div>
-                    <div class="metric-card">
-                        <h4>Potřebné pro bezpečný provoz</h4>
-                        <div class="metric-value">6 000 tun</div>
-                        <div class="metric-change">Minimum pro plynulou výrobu</div>
-                    </div>
-                </div>
-                
-                <div class="alert-card critical">
-                    <h3>Analýza rizika - Týden W23</h3>
-                    <p>V týdnu W23 očekáváme opět kritický pokles zásob bram na pouhých 2 784 tun, což je podobně kritická situace jako v týdnu W17. Tento stav nastává po vyčerpání materiálu z dodávky Hadeed III a před příjezdem dostatečných dodávek z lodi Hadeed IV.</p>
-                    <p>Doporučená opatření:</p>
-                    <ul>
-                        <li>Optimalizace výrobního plánu tak, aby větší část výroby spadala mimo kritické období</li>
-                        <li>Zajištění pohotovostního plánu pro urychlený transport materiálu z lodi Hadeed IV</li>
-                        <li>Možnost distribuce materiálu z jiných výrobních závodů Liberty</li>
-                    </ul>
-                </div>
-                
-                <h3>Časová osa dodávek - Období B</h3>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Hadeed III - Poslední dodávka</h4>
-                            <p>Poslední část materiálu z lodi Hadeed III je transportována do Ostravy - 3 141 tun.</p>
-                            <p><strong>Datum:</strong> 20.5.2025 - 22.5.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Hadeed IV - Příjezd do přístavu</h4>
-                            <p>Loď VANGUARD s nákladem Hadeed IV připluje do přístavu.</p>
-                            <p><strong>Datum (ETA):</strong> 28.5.2025 - 30.5.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
-                            <p>Stav zásob klesá na kritických 2 784 tun, hluboko pod bezpečnou úrovní.</p>
-                            <p><strong>Datum:</strong> 2.6.2025 (Týden W23)</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Hadeed IV - První transport</h4>
-                            <p>První část materiálu z lodi Hadeed IV dorazí do Ostravy - 6 000 tun.</p>
-                            <p><strong>Datum:</strong> 5.6.2025 - 7.6.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-chart-line" style="color: #4caf50;"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Obnovení bezpečné úrovně zásob</h4>
-                            <p>Stav zásob se postupně vrací nad bezpečnou úroveň 6 000 tun díky dodávkám z lodi Hadeed IV.</p>
-                            <p><strong>Datum:</strong> 10.6.2025</p>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
-                        <div class="timeline-content">
-                            <h4 class="timeline-title">Evraz V - Očekávaný příjezd</h4>
-                            <p>Plánovaný příjezd lodi s dodávkou Evraz V, která zajistí stabilizaci zásob pro letní období.</p>
-                            <p><strong>Datum (ETA):</strong> 20.6.2025</p>
-                        </div>
-                    </div>
-                </div>
+    <header>
+        <h1>Sledování lodí a stavu zásob</h1>
+    </header>
+    
+    <div class="tabs">
+        <button class="tab-button active" data-tab="ships">Aktuální poloha lodí</button>
+        <button class="tab-button" data-tab="inventory">Stav zásob</button>
+    </div>
+    
+    <div id="ships-tab" class="tab-content active">
+        <div id="map"></div>
+        <h2>Informace o lodích</h2>
+        <div class="ship-cards">
+            <!-- Sem budou dynamicky přidané karty s loděmi -->
+            <div class="ship-card">
+                <h3>Loď 1</h3>
+                <p>Ukázková karta lodě</p>
             </div>
         </div>
     </div>
     
+    <div id="inventory-tab" class="tab-content">
+        <h2>Graf stavu zásob</h2>
+        <div id="inventory-chart"></div>
+        <h2>Časová osa dodávek</h2>
+        <div class="timeline">
+            <!-- Sem bude přidána časová osa -->
+            <p>Zde bude zobrazena časová osa dodávek a kritická období</p>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
     <script>
-        // Přepínání záložek - opravená verze
-        function setupTabSwitching() {
-            const tabs = document.querySelectorAll('.tab');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    try {
-                        // Odstranění active class z aktuálně aktivních prvků
-                        const activeTab = document.querySelector('.tab.active');
-                        if (activeTab) activeTab.classList.remove('active');
-                        
-                        const activeContent = document.querySelector('.tab-content.active');
-                        if (activeContent) activeContent.classList.remove('active');
-                        
-                        // Přidání active class na kliknutou záložku
-                        this.classList.add('active');
-                        const tabId = this.getAttribute('data-tab');
-                        const tabContent = document.getElementById(tabId + '-tab');
-                        
-                        if (tabContent) {
-                            tabContent.classList.add('active');
-                            
-                            // Pokud je to záložka s grafem, obnovíme graf
-                            if (tabId === 'critical' && window.inventoryChart) {
-                                window.inventoryChart.update();
-                            }
-                        } else {
-                            console.error('Tab content not found:', tabId + '-tab');
-                        }
-                    } catch (error) {
-                        console.error('Error switching tabs:', error);
-                    }
-                });
-            });
-            
-            // Log pro ověření, že funkce byla spuštěna
-            console.log('Tab switching setup completed, found', tabs.length, 'tabs');
-        }
-        
-        // Přepínání mezi obdobími
-        document.querySelectorAll('.period-button').forEach(button => {
-            button.addEventListener('click', function() {
-                // Odstranění active class z aktuálně aktivního období
-                document.querySelector('.period-button.active').classList.remove('active');
-                document.querySelector('.period-content.active').classList.remove('active');
-                
-                // Přidání active class na kliknuté období
-                this.classList.add('active');
-                const periodId = this.getAttribute('data-period');
-                document.getElementById('period-' + periodId).classList.add('active');
-            });
-        });
-        
-        // Data pro inventářní graf
-        const inventoryData = {
-            labels: ['W10', 'W11', 'W12', 'W13', 'W14', 'W15', 'W16', 'W17', 'W18', 'W19', 'W20', 'W21', 'W22', 'W23', 'W24', 'W25', 'W26', 'W27', 'W28'],
-            datasets: [
-                {
-                    label: 'Stav zásob bram (tuny)',
-                    data: [2373, 6267, 3166, 4945, 4086, 3428, 6128, 2713, 8555, 9055, 10055, 8555, 4284, 2784, 3196, 5496, 7796, 9296, 9196],
-                    borderColor: '#1a4f8a',
-                    backgroundColor: 'rgba(26, 79, 138, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.3
-                },
-                {
-                    label: 'Bezpečná úroveň zásob',
-                    data: Array(19).fill(6000),
-                    borderColor: '#f44336',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    fill: false,
-                    pointRadius: 0
-                }
-            ]
-        };
-        
-        // Data o lodích
-        const vesselsData = [
-            {
-                name: 'FLAMINGO 1',
-                imo: '9474199',
-                mmsi: '352002503',
-                position: { lat: 35.4562, lon: 24.8721 },
-                status: 'Underway using engine',
-                destination: 'Koper, Slovenia',
-                eta: '2025-05-15 08:30',
-                course: '245° / 12.5 kn',
-                lastUpdate: '2025-04-26T09:15:23Z',
-                color: '#ff7043'
-            },
-            {
-                name: 'PELIKAN',
-                imo: '9474280',
-                mmsi: '352003347',
-                position: { lat: 41.9812, lon: 19.3742 },
-                status: 'Underway using engine',
-                destination: 'Rijeka, Croatia',
-                eta: '2025-05-22 13:45',
-                course: '320° / 10.2 kn',
-                lastUpdate: '2025-04-26T09:15:23Z',
-                color: '#42a5f5'
-            },
-            {
-                name: 'HARMONY',
-                imo: '9449522',
-                mmsi: '352003307',
-                position: { lat: 44.3642, lon: 33.7923 },
-                status: 'Underway using engine',
-                destination: 'Constanta, Romania',
-                eta: '2025-05-18 22:15',
-                course: '190° / 11.7 kn',
-                lastUpdate: '2025-04-26T09:15:23Z',
-                color: '#66bb6a'
-            }
-        ];
-        
-        // Data o zásobách
-        const inventoryItems = [
-            { name: 'Bramy HADEED III', current: 1200, unit: 't', expected: 5000, source: 'HARMONY', delivery: '30.4.2025', status: 'medium' },
-            { name: 'Bramy EVRAZ IV', current: 350, unit: 't', expected: 3000, source: 'PELIKAN', delivery: '22.4.2025', status: 'low' },
-            { name: 'Bramy SUBROSA', current: 2500, unit: 't', expected: 1800, source: 'FLAMINGO 1', delivery: '15.5.2025', status: 'high' },
-            { name: 'Bramy EVRAZ V', current: 680, unit: 't', expected: 2200, source: 'FLAMINGO 1', delivery: '15.5.2025', status: 'medium' },
-            { name: 'Sochory BENTELER', current: 220, unit: 't', expected: 1500, source: 'PELIKAN', delivery: '22.5.2025', status: 'low' },
-            { name: 'Sochory COGNOR', current: 1800, unit: 't', expected: 1000, source: 'HARMONY', delivery: '18.5.2025', status: 'high' }
-        ];
-        
-        // Konfigurace grafu zásob
-        const inventoryChartConfig = {
-            type: 'line',
-            data: inventoryData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y.toLocaleString() + ' tun';
-                                }
-                                return label;
-                            }
-                        }
-                    },
-                    legend: {
-                        position: 'top',
-                    },
-                    annotation: {
-                        annotations: {
-                            criticalZoneA: {
-                                type: 'box',
-                                xMin: 6,
-                                xMax: 7,
-                                backgroundColor: 'rgba(244, 67, 54, 0.15)',
-                                borderColor: 'rgba(244, 67, 54, 0.6)',
-                                borderWidth: 1
-                            },
-                            criticalZoneB: {
-                                type: 'box',
-                                xMin: 12,
-                                xMax: 13,
-                                backgroundColor: 'rgba(244, 67, 54, 0.15)',
-                                borderColor: 'rgba(244, 67, 54, 0.6)',
-                                borderWidth: 1
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Množství (tuny)'
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Týden'
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            }
-        };
-
-        // Inicializace mapy
-        function initMap() {
-            const map = L.map('map').setView([40, 20], 5);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-            
-            return map;
-        }
-        
-        // Zobrazení lodí na mapě
-        function displayVessels(map, vessels) {
-            const bounds = L.latLngBounds();
-            const markers = {};
-            
-            vessels.forEach(vessel => {
-                if (!vessel.position || !vessel.position.lat || !vessel.position.lon) {
-                    return;
-                }
-                
-                const position = L.latLng(parseFloat(vessel.position.lat), parseFloat(vessel.position.lon));
-                bounds.extend(position);
-                
-                const vesselIconHtml = `<div style="color: ${vessel.color}; font-size: 24px;">⚓</div>`;
-                const shipIcon = L.divIcon({
-                    html: vesselIconHtml,
-                    className: 'ship-marker',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                });
-                
-                const marker = L.marker(position, { icon: shipIcon })
-                    .addTo(map)
-                    .bindPopup(`
-                        <div class="popup-content">
-                            <h3>${vessel.name}</h3>
-                            <p>IMO: ${vessel.imo}</p>
-                            <p>Status: ${vessel.status || 'Neznámý'}</p>
-                            <p>Cíl: ${vessel.destination || 'Neznámý'}</p>
-                            <p>ETA: ${vessel.eta || 'Nedostupné'}</p>
-                            <p>Kurz/Rychlost: ${vessel.course || 'Nedostupné'}</p>
-                        </div>
-                    `);
-                
-                markers[vessel.name] = marker;
-            });
-            
-            // Přiblížení mapy tak, aby byly vidět všechny lodě
-            if (!bounds.isEmpty()) {
-                map.fitBounds(bounds, { padding: [50, 50] });
-            }
-            
-            return markers;
-        }
-        
-        // Aktualizace informací o lodích
-        function updateVesselInfo(vessels) {
-            vessels.forEach(vessel => {
-                const nameLower = vessel.name.toLowerCase().replace(/\s+/g, '-');
-                
-                const positionEl = document.getElementById(`${nameLower}-position`);
-                const statusEl = document.getElementById(`${nameLower}-status`);
-                const destinationEl = document.getElementById(`${nameLower}-destination`);
-                const etaEl = document.getElementById(`${nameLower}-eta`);
-                
-                if (positionEl && vessel.position && vessel.position.lat && vessel.position.lon) {
-                    positionEl.textContent = `Pozice: ${parseFloat(vessel.position.lat).toFixed(4)}° N, ${parseFloat(vessel.position.lon).toFixed(4)}° E`;
-                }
-                
-                if (statusEl) {
-                    statusEl.textContent = `Status: ${vessel.status || 'Neznámý'}`;
-                }
-                
-                if (destinationEl) {
-                    destinationEl.textContent = `Cíl: ${vessel.destination || 'Neznámý'}`;
-                }
-                
-                if (etaEl) {
-                    etaEl.textContent = `ETA: ${vessel.eta || 'Nedostupné'}`;
-                }
-            });
-            
-            // Aktualizace času poslední aktualizace
-            const lastUpdateEl = document.getElementById('last-update');
-            if (lastUpdateEl && vessels.length > 0) {
-                const updateDate = new Date(vessels[0].lastUpdate);
-                lastUpdateEl.textContent = `Poslední aktualizace: ${updateDate.toLocaleString('cs-CZ')}`;
-            }
-        }
-        
-        // Aktualizace tabulky zásob
-        function updateInventoryTable(items) {
-            const tableBody = document.getElementById('inventory-data');
-            if (!tableBody) return;
-            
-            tableBody.innerHTML = '';
-            
-            items.forEach(item => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${item.name}</td>
-                    <td class="status-${item.status}">${item.current} ${item.unit}</td>
-                    <td>${item.expected} ${item.unit}</td>
-                    <td>${item.source}</td>
-                    <td>${item.delivery}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        
-        // Po načtení dokumentu
+        // Základní JavaScript pro přepínání záložek
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM content loaded, initializing application...');
+            const tabButtons = document.querySelectorAll('.tab-button');
             
-            try {
-                // Inicializace přepínání záložek
-                setupTabSwitching();
-                
-                // Inicializace mapy a zobrazení lodí
-                const map = initMap();
-                const markers = displayVessels(map, vesselsData);
-                
-                // Aktualizace informací o lodích
-                updateVesselInfo(vesselsData);
-                
-                // Aktualizace tabulky zásob
-                updateInventoryTable(inventoryItems);
-                
-                // Inicializace grafu zásob
-                const chartElement = document.getElementById('inventory-chart');
-                if (chartElement) {
-                    const ctx = chartElement.getContext('2d');
-                    window.inventoryChart = new Chart(ctx, inventoryChartConfig);
-                    
-                    // Zvýraznění kritických období na grafu
-                    const criticalZones = [
-                        { week: 'W17', color: 'rgba(244, 67, 54, 0.2)' },
-                        { week: 'W23', color: 'rgba(244, 67, 54, 0.2)' }
-                    ];
-                    
-                    criticalZones.forEach(zone => {
-                        const weekIndex = inventoryData.labels.indexOf(zone.week);
-                        if (weekIndex !== -1) {
-                            const weekWidth = ctx.canvas.width / inventoryData.labels.length;
-                            const zoneX = weekIndex * weekWidth;
-                            
-                            // Přidání zvýraznění pro kritické období
-                            const zoneElement = document.createElement('div');
-                            zoneElement.className = 'critical-bar';
-                            zoneElement.style.left = `${zoneX}px`;
-                            zoneElement.style.width = `${weekWidth}px`;
-                            zoneElement.style.backgroundColor = zone.color;
-                            
-                            ctx.canvas.parentNode.appendChild(zoneElement);
-                        }
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Odstranit třídu active ze všech záložek
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
                     });
-                } else {
-                    console.error('Chart element not found');
-                }
-                
-                console.log('Application initialization complete');
-            } catch (error) {
-                console.error('Error initializing application:', error);
-                // Zobrazení chybové zprávy uživateli
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'error-message';
-                errorMessage.innerHTML = `
-                    <h3>Došlo k chybě při načítání aplikace</h3>
-                    <p>Zkuste stránku obnovit nebo kontaktujte správce systému.</p>
-                    <p><small>Detaily chyby: ${error.message}</small></p>
-                `;
-                document.body.prepend(errorMessage);
-            }
+                    
+                    // Přidat třídu active aktuální záložce
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab + '-tab').classList.add('active');
+                });
+            });
+            
+            // Zde bude později inicializace mapy a grafů
+            // Inicializace mapy (připraveno pro budoucí implementaci)
+            // const map = L.map('map').setView([50.0755, 14.4378], 13);
+            // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            // Inicializace grafu (připraveno pro budoucí implementaci)
+            // const ctx = document.getElementById('inventory-chart').getContext('2d');
+            // const inventoryChart = new Chart(ctx, { ... });
         });
-        
-        // Záložní řešení pro případ, že by DOMContentLoaded již proběhl
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            console.log('Document already loaded, setting up tab switching directly');
-            setupTabSwitching();
-        }
+    </script>
+// Data pro lodě a materiály
+const shipsData = [
+  {
+    name: "FLAMINGO 1",
+    position: [19.44661, 57.47127],
+    color: "#ff7043",
+    imo: "IMO 9474199",
+    status: "Underway using engine",
+    destination: "Szczecin, Poland",
+    eta: "2025-05-28",
+    course: 0,
+    speed: 10,
+    cargo: "HADEED 4",
+    loadingPort: "FUJAIRAH"
+  },
+  {
+    name: "PELIKAN",
+    position: [24.12094, 58.04735],
+    color: "#42a5f5",
+    imo: "IMO (neznámé)",
+    status: "Plánovaná nakládka",
+    destination: "Swinoujscie, Poland",
+    eta: "2025-06-12",
+    course: 0,
+    speed: 0,
+    cargo: "HADEED 5",
+    loadingPort: "FUJAIRAH"
+  },
+  {
+    name: "HARMONY",
+    position: [37.24649, 5.36620],
+    color: "#66bb6a",
+    imo: "IMO 9449522",
+    status: "Underway - pod Sardinií",
+    destination: "Swinoujscie, Poland",
+    eta: "2025-05-08",
+    course: 0,
+    speed: 10,
+    cargo: "HADEED 3",
+    loadingPort: "FUJAIRAH"
+  }
+];
+
+const materialsData = [
+  {
+    type: "Bramy HADEED 3",
+    currentAmount: 0,
+    expectedAmount: 2500,
+    sourceShip: "HARMONY",
+    deliveryDate: "2025-05-08"
+  },
+  {
+    type: "Bramy HADEED 4",
+    currentAmount: 0,
+    expectedAmount: 1800,
+    sourceShip: "FLAMINGO 1",
+    deliveryDate: "2025-05-28"
+  },
+  {
+    type: "Bramy HADEED 5",
+    currentAmount: 0,
+    expectedAmount: 1500,
+    sourceShip: "PELIKAN",
+    deliveryDate: "2025-06-12"
+  }
+];
+
+// Inicializace mapy
+let map;
+let shipMarkers = {};
+
+function initMap() {
+  // Nastavení základní mapy se zaměřením na Evropu
+  map = L.map('map').setView([42.0, 25.0], 5);
+  
+  // Přidání tile vrstvy - OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  }).addTo(map);
+  
+  // Zobrazení lodí na mapě
+  displayShips();
+  
+  // Aktualizace informací o lodích v kartách
+  updateShipCards();
+  
+  // Naplnění tabulky se zásobami
+  fillInventoryTable();
+}
+
+// Funkce pro zobrazení lodí na mapě
+function displayShips() {
+  shipsData.forEach(ship => {
+    // Vytvoření ikony pro marker
+    const shipIcon = L.divIcon({
+      className: 'ship-marker',
+      html: `<div style="background-color: ${ship.color}; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 8px;">SHIP</div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+    
+    // Vytvoření markeru a přidání na mapu
+    const marker = L.marker(ship.position, {icon: shipIcon}).addTo(map);
+    
+    // Text pro popup
+    const popupContent = `
+      <div class="ship-popup">
+        <h3>${ship.name}</h3>
+        <p><strong>${ship.imo}</strong></p>
+        <p><strong>Status:</strong> ${ship.status}</p>
+        <p><strong>Destination:</strong> ${ship.destination}</p>
+        <p><strong>ETA:</strong> ${ship.eta}</p>
+        <p><strong>Course/Speed:</strong> ${ship.course}° / ${ship.speed} knots</p>
+      </div>
+    `;
+    
+    // Přidání popup k markeru
+    marker.bindPopup(popupContent);
+    
+    // Uložení markeru pro pozdější použití
+    shipMarkers[ship.name] = marker;
+  });
+}
+
+// Funkce pro aktualizaci informací o lodích v kartách
+function updateShipCards() {
+  const shipCardsContainer = document.getElementById('ship-cards');
+  
+  // Vymazání stávajícího obsahu
+  if (shipCardsContainer) {
+    shipCardsContainer.innerHTML = '';
+    
+    // Vytvoření karet pro každou loď
+    shipsData.forEach(ship => {
+      const shipCard = document.createElement('div');
+      shipCard.className = 'ship-card';
+      shipCard.style.borderLeft = `5px solid ${ship.color}`;
+      
+      shipCard.innerHTML = `
+        <h3>${ship.name}</h3>
+        <p><strong>Position:</strong> ${ship.position[0].toFixed(4)}° N, ${ship.position[1].toFixed(4)}° E</p>
+        <p><strong>Status:</strong> ${ship.status}</p>
+        <p><strong>Cargo:</strong> ${ship.cargo}</p>
+        <p><strong>Destination:</strong> ${ship.destination}</p>
+        <p><strong>ETA:</strong> ${ship.eta}</p>
+      `;
+      
+      // Přidání události kliknutí pro centrování mapy na danou loď
+      shipCard.addEventListener('click', () => {
+        map.setView(ship.position, 8);
+        shipMarkers[ship.name].openPopup();
+      });
+      
+      shipCardsContainer.appendChild(shipCard);
+    });
+  }
+}
+
+// Funkce pro naplnění tabulky se zásobami
+function fillInventoryTable() {
+  const inventoryTable = document.getElementById('inventory-table');
+  
+  if (inventoryTable) {
+    // Vytvoření hlavičky tabulky
+    const tableHeader = document.createElement('thead');
+    tableHeader.innerHTML = `
+      <tr>
+        <th>Materiál</th>
+        <th>Aktuální množství</th>
+        <th>Očekávané množství</th>
+        <th>Zdrojová loď</th>
+        <th>Datum dodání</th>
+      </tr>
+    `;
+    
+    // Vytvoření těla tabulky
+    const tableBody = document.createElement('tbody');
+    
+    materialsData.forEach(material => {
+      const row = document.createElement('tr');
+      
+      // Nalezení barvy lodi pro barevné označení řádku
+      const shipColor = shipsData.find(ship => ship.name === material.sourceShip)?.color || '#cccccc';
+      
+      row.innerHTML = `
+        <td>${material.type}</td>
+        <td>${material.currentAmount} t</td>
+        <td>${material.expectedAmount} t</td>
+        <td style="color: ${shipColor}; font-weight: bold;">${material.sourceShip}</td>
+        <td>${material.deliveryDate}</td>
+      `;
+      
+      tableBody.appendChild(row);
+    });
+    
+    // Přidání hlavičky a těla do tabulky
+    inventoryTable.innerHTML = '';
+    inventoryTable.appendChild(tableHeader);
+    inventoryTable.appendChild(tableBody);
+  }
+}
+
+// CSS styly pro aplikaci
+function addCustomStyles() {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    .ship-card {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .ship-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .ship-popup h3 {
+      margin-top: 0;
+      margin-bottom: 5px;
+    }
+    
+    .ship-popup p {
+      margin: 5px 0;
+    }
+    
+    #inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    #inventory-table th, #inventory-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    #inventory-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    
+    #inventory-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    
+    #inventory-table tr:hover {
+      background-color: #f0f0f0;
+    }
+  `;
+  
+  document.head.appendChild(styleElement);
+}
+
+// Inicializace aplikace po načtení stránky
+document.addEventListener('DOMContentLoaded', () => {
+  addCustomStyles();
+  initMap();
+});
+</body>
+</html>
