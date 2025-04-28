@@ -62,10 +62,14 @@
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-        }
         .map-container {
             flex: 1 1 700px;
-            height: 500px; /* Přidejte explicitní výšku */
+            /* Bez čárky na konci */
+        }
+
+        #map {
+            height: 500px; /* Přidejte explicitní výšku pro div s ID "map" */
+            width: 100%;
         }
         .inventory-container {
             flex: 1 1 400px;
