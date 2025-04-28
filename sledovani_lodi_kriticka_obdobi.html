@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sledování lodí a kritických období</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+        header { background: #1a4f8a; color: #fff; padding: 15px; text-align: center; font-size: 1.5em; }
+        .tabs { display: flex; background: #eee; }
+        .tab { padding: 10px 20px; cursor: pointer; }
+        .tab.active { background: #fff; border-bottom: 2px solid #1a4f8a; font-weight: bold; }
+        .tab-content { display: none; padding: 20px; }
+        .tab-content.active { display: block; }
+        #map { height: 500px; margin-bottom: 20px; }
+        .vessel-cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;}
+        .card { background: #fff; padding: 10px; border-left: 5px solid; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .flamingo { border-color: #ff7043; }
+        .pelikan { border-color: #42a5f5; }
+        .harmony { border-color: #66bb6a; }
+        .chart-container { background: #fff; padding: 20px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 1000px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; background: #fff; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+        .arrival { background: #bbdefb; }
+        .transport { background: #c8e6c9; }
+        .criticalA { background: #ffcdd2; }
+        .criticalB { background: #fff9c4; }
+    </style>
+</head>
+<body>
+
+<header>Sledování lodí a kritických období zásobování</header>
+
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('mapTab')">Aktuální poloha lodí</div>
+    <div class="tab" onclick="switchTab('criticalTab')">Kritická období</div>
+</div>
+
+<div id="mapTab" class="tab-content active">
+    <div id="map"></div>
+    <div class="vessel-cards">
+        <div class="card flamingo">
+            <h4>FLAMINGO 1</h4>
+            <p>Pozice: 35.45, 24.87</p>
+            <p>Status: Plavba</p>
+            <p>Cíl: Koper</p>
+            <p>ETA: 15.5.2025</p>
+        </div>
+        <div class="card pelikan">
+            <h4>PELIKAN</h4>
+            <p>Pozice: 41.98, 19.37</p>
+            <p>Status: Plavba</p>
+            <p>Cíl: Rijeka</p>
+            <p>ETA: 22.5.2025</p>
+        </div>
+        <div class="card harmony">
+            <h4>HARMONY</h4>
+            <p>Pozice: 44.36, 33.79</p>
+            <p>Status: Plavba</p>
+            <p>Cíl: Constanta</p>
+            <p>ETA: 18.5.2025</p>
+        </div>
+    </div>
+</div>
+
+<div id="criticalTab" class="tab-content">
+    <div class="chart-container">
+        <canvas id="inventoryChart"></canvas>
+    </div>
+    <table>
+        <tr>
+            <th>Loď</th><th>W14</th><th>W15</th><th>W16</th><th>W17</th><th>W18</th><th>W19</th><th>W20</th><th>W21</th><th>W22</th><th>W23</th><th>W24</th>
+        </tr>
+        <tr>
+            <td>Evraz III</td><td class="arrival"></td><td class="transport"></td><td class="transport"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td>Hadeed III</td><td></td><td></td><td class="arrival"></td><td class="transport"></td><td class="transport"></td><td></td><td></td><td></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td>Hadeed IV</td><td></td><td></td><td></td><td></td><td></td><td class="arrival"></td><td class="transport"></td><td class="transport"></td><td></td><td></td><td></td>
+        </tr>
+        <tr>
+            <td>Kritická období</td><td></td><td></td><td></td><td class="criticalA"></td><td></td><td></td><td></td><td></td><td class="criticalB"></td><td></td><td></td>
+        </tr>
+    </table>
+</div>
+
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => {
+        if(t.getAttribute('onclick').includes(tabId)) t.classList.add('active');
+    });
+}
+
+// Inicializace mapy
+var map = L.map('map').setView([40, 20], 4);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+var vessels = [
+    {name: "FLAMINGO 1", coords: [35.45, 24.87]},
+    {name: "PELIKAN", coords: [41.98, 19.37]},
+    {name: "HARMONY", coords: [44.36, 33.79]}
+];
+vessels.forEach(v => L.marker(v.coords).addTo(map).bindPopup(v.name));
+
+// Graf Chart.js
+const ctx = document.getElementById('inventoryChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ["03-03","10-03","17-03","24-03","31-03","07-04","14-04","21-04","28-04","05-05","12-05","19-05","26-05","02-06"],
+        datasets: [
+            {
+                label: "Stav zásob (tuny)",
+                data: [2373,6267,3166,4945,4086,3428,6550,2713,10913,9643,10143,11143,4284,2784],
+                borderColor: "#1a4f8a",
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: ["#1a4f8a","#1a4f8a","#1a4f8a","#1a4f8a","#1a4f8a","#1a4f8a","#1a4f8a","red","#1a4f8a","#1a4f8a","#1a4f8a","#1a4f8a","#1a4f8a","orange"],
+                pointRadius: 6
+            },
+            {
+                label: "Bezpečná úroveň",
+                data: Array(14).fill(6000),
+                borderColor: "#f44336",
+                borderDash: [5,5],
+                fill: false,
+                pointRadius: 0
+            }
+        ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
+});
+</script>
+
+</body>
+</html>
