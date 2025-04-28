@@ -190,19 +190,167 @@
     </div>
     
     <div id="inventory-tab" class="tab-content">
-        <h2>Stav zásob materiálů</h2>
-        <table id="inventory-table">
-            <!-- Sem bude dynamicky přidána tabulka zásob -->
-        </table>
-        
-        <h2>Graf stavu zásob</h2>
-        <div id="inventory-chart"></div>
-        
-        <h2>Časová osa dodávek</h2>
-        <div class="timeline">
-            <!-- Sem bude přidána časová osa -->
-            <p>Zde bude zobrazena časová osa dodávek a kritická období</p>
+    <!-- Přepínače kritických období -->
+    <div class="critical-periods-selector">
+        <h2>Kritická období zásobování</h2>
+        <div class="warning-banner">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="warning-icon">
+                <path fill="none" d="M0 0h24v24H0z"/>
+                <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z" fill="currentColor"/>
+            </svg>
+            <p>Identifikovaná rizika zastavení výroby z důvodu nedostatku materiálu</p>
         </div>
+        <div class="period-tabs">
+            <button class="period-tab active" data-period="w17">Kritické období W17</button>
+            <button class="period-tab" data-period="w23">Kritické období W23</button>
+        </div>
+    </div>
+
+    <!-- Obsah pro kritické období W17 -->
+    <div class="period-content active" id="w17-content">
+        <div class="metrics-container">
+            <div class="metric-card danger">
+                <div class="metric-value">2 713 t</div>
+                <div class="metric-label">Minimální stav zásob</div>
+                <div class="metric-date">21.4.2025</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-value">6 000 t</div>
+                <div class="metric-label">Bezpečná úroveň zásob</div>
+                <div class="metric-info">Minimální množství pro plynulý provoz</div>
+            </div>
+            <div class="metric-card info">
+                <div class="metric-value">3 287 t</div>
+                <div class="metric-label">Deficit zásob</div>
+                <div class="metric-info">Množství potřebné k pokrytí rizika</div>
+            </div>
+        </div>
+
+        <div class="analysis-container">
+            <div class="analysis-card">
+                <h3>Analýza rizika</h3>
+                <p><strong>Příčiny kritického stavu:</strong></p>
+                <ul>
+                    <li>Zpoždění dodávky materiálu HADEED 3 z lodi HARMONY</li>
+                    <li>Zvýšená spotřeba materiálu v období 15.4. - 20.4.2025</li>
+                    <li>Nejistý termín doplutí lodi HARMONY do přístavu Swinoujscie</li>
+                </ul>
+                <p><strong>Navrhovaná opatření:</strong></p>
+                <ul>
+                    <li>Zajistit prioritní vykládku lodi HARMONY ihned po připlutí</li>
+                    <li>Připravit záložní železniční kapacity pro urychlený transport materiálu do Ostravy</li>
+                    <li>Dočasně omezit výrobu energeticky náročných produktů</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Časová osa klíčových událostí</h3>
+        <div class="timeline-container">
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">8.4.2025</div>
+                    <div class="timeline-content">
+                        <h4>Odplutí HARMONY z přístavu Fujairah</h4>
+                        <p>Náklad: Bramy HADEED 3</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">21.4.2025</div>
+                    <div class="timeline-content warning">
+                        <h4>Kritický stav zásob</h4>
+                        <p>Předpokládaný pokles na 2 713 tun</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">1.5.2025</div>
+                    <div class="timeline-content">
+                        <h4>Očekávaný příjezd HARMONY do Swinoujscie</h4>
+                        <p>Náklad: 2 500 tun Bramy HADEED 3</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">3.5.2025</div>
+                    <div class="timeline-content">
+                        <h4>Transport materiálu do Ostravy</h4>
+                        <p>Předpokládaná doba transportu: 2 dny</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Obsah pro kritické období W23 -->
+    <div class="period-content" id="w23-content">
+        <div class="metrics-container">
+            <div class="metric-card danger">
+                <div class="metric-value">2 784 t</div>
+                <div class="metric-label">Minimální stav zásob</div>
+                <div class="metric-date">2.6.2025</div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-value">6 000 t</div>
+                <div class="metric-label">Bezpečná úroveň zásob</div>
+                <div class="metric-info">Minimální množství pro plynulý provoz</div>
+            </div>
+            <div class="metric-card info">
+                <div class="metric-value">3 216 t</div>
+                <div class="metric-label">Deficit zásob</div>
+                <div class="metric-info">Množství potřebné k pokrytí rizika</div>
+            </div>
+        </div>
+
+        <div class="analysis-container">
+            <div class="analysis-card">
+                <h3>Analýza rizika</h3>
+                <p><strong>Příčiny kritického stavu:</strong></p>
+                <ul>
+                    <li>Odložení nakládky materiálu HADEED 5 v přístavu Fujairah</li>
+                    <li>Změna dodavatele z původního GALAXY na PELIKAN</li>
+                    <li>Prodloužení dodací lhůty o 14 dní</li>
+                </ul>
+                <p><strong>Navrhovaná opatření:</strong></p>
+                <ul>
+                    <li>Urgovat potvrzení změny lodě s přístavem Swinoujscie</li>
+                    <li>Zajistit přepravní kapacity pro okamžitý transport po vykládce</li>
+                    <li>Projednat možnost dílčí dodávky materiálu letecky pro kritické komponenty</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Časová osa klíčových událostí</h3>
+        <div class="timeline-container">
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">15.5.2025</div>
+                    <div class="timeline-content">
+                        <h4>Plánované odplutí PELIKAN z přístavu Fujairah</h4>
+                        <p>Náklad: Bramy HADEED 5</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">2.6.2025</div>
+                    <div class="timeline-content warning">
+                        <h4>Kritický stav zásob</h4>
+                        <p>Předpokládaný pokles na 2 784 tun</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">12.6.2025</div>
+                    <div class="timeline-content">
+                        <h4>Očekávaný příjezd PELIKAN do Swinoujscie</h4>
+                        <p>Náklad: 1 500 tun Bramy HADEED 5</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">14.6.2025</div>
+                    <div class="timeline-content">
+                        <h4>Transport materiálu do Ostravy</h4>
+                        <p>Předpokládaná doba transportu: 2 dny</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     
     <!-- Leaflet JS -->
