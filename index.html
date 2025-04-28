@@ -365,9 +365,29 @@
         </header>
         
         <div class="tabs">
-            <div class="tab active" data-tab="ships">Aktuální poloha lodí</div>
-            <div class="tab" data-tab="critical">Kritická období</div>
+            <div class="tab active" data-tab="ships" onclick="switchTab('ships')">Aktuální poloha lodí</div>
+            <div class="tab" data-tab="critical" onclick="switchTab('critical')">Kritická období</div>
         </div>
+        
+        <script>
+            // Přímá funkce pro přepínání záložek
+            function switchTab(tabId) {
+                console.log('Switching to tab:', tabId);
+                
+                // Deaktivace všech záložek a obsahů
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Aktivace vybrané záložky a obsahu
+                document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+                document.getElementById(tabId + '-tab').classList.add('active');
+                
+                // Pokud je to záložka s grafem, obnovíme graf
+                if (tabId === 'critical' && window.inventoryChart) {
+                    window.inventoryChart.update();
+                }
+            }
+        </script>
         
         <div id="ships-tab" class="tab-content active">
             <div class="main-content">
@@ -628,24 +648,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
-        // Přepínání záložek
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Odstranění active class z aktuálně aktivní záložky
-                document.querySelector('.tab.active').classList.remove('active');
-                document.querySelector('.tab-content.active').classList.remove('active');
-                
-                // Přidání active class na kliknutou záložku
-                this.classList.add('active');
-                const tabId = this.getAttribute('data-tab');
-                document.getElementById(tabId + '-tab').classList.add('active');
-                
-                // Pokud je to záložka s grafem, obnovíme graf
-                if (tabId === 'critical' && window.inventoryChart) {
-                    window.inventoryChart.update();
-                }
+        // Přepínání záložek - opravená verze
+        function setupTabSwitching() {
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    try {
+                        // Odstranění active class z aktuálně aktivních prvků
+                        const activeTab = document.querySelector('.tab.active');
+                        if (activeTab) activeTab.classList.remove('active');
+                        
+                        const activeContent = document.querySelector('.tab-content.active');
+                        if (activeContent) activeContent.classList.remove('active');
+                        
+                        // Přidání active class na kliknutou záložku
+                        this.classList.add('active');
+                        const tabId = this.getAttribute('data-tab');
+                        const tabContent = document.getElementById(tabId + '-tab');
+                        
+                        if (tabContent) {
+                            tabContent.classList.add('active');
+                            
+                            // Pokud je to záložka s grafem, obnovíme graf
+                            if (tabId === 'critical' && window.inventoryChart) {
+                                window.inventoryChart.update();
+                            }
+                        } else {
+                            console.error('Tab content not found:', tabId + '-tab');
+                        }
+                    } catch (error) {
+                        console.error('Error switching tabs:', error);
+                    }
+                });
             });
-        });
+            
+            // Log pro ověření, že funkce byla spuštěna
+            console.log('Tab switching setup completed, found', tabs.length, 'tabs');
+        }
         
         // Přepínání mezi obdobími
         document.querySelectorAll('.period-button').forEach(button => {
@@ -924,40 +964,71 @@
         
         // Po načtení dokumentu
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializace mapy a zobrazení lodí
-            const map = initMap();
-            const markers = displayVessels(map, vesselsData);
+            console.log('DOM content loaded, initializing application...');
             
-            // Aktualizace informací o lodích
-            updateVesselInfo(vesselsData);
-            
-            // Aktualizace tabulky zásob
-            updateInventoryTable(inventoryItems);
-            
-            // Inicializace grafu zásob
-            const ctx = document.getElementById('inventory-chart').getContext('2d');
-            window.inventoryChart = new Chart(ctx, inventoryChartConfig);
-            
-            // Zvýraznění kritických období na grafu
-            const criticalZones = [
-                { week: 'W17', color: 'rgba(244, 67, 54, 0.2)' },
-                { week: 'W23', color: 'rgba(244, 67, 54, 0.2)' }
-            ];
-            
-            criticalZones.forEach(zone => {
-                const weekIndex = inventoryData.labels.indexOf(zone.week);
-                if (weekIndex !== -1) {
-                    const weekWidth = ctx.canvas.width / inventoryData.labels.length;
-                    const zoneX = weekIndex * weekWidth;
+            try {
+                // Inicializace přepínání záložek
+                setupTabSwitching();
+                
+                // Inicializace mapy a zobrazení lodí
+                const map = initMap();
+                const markers = displayVessels(map, vesselsData);
+                
+                // Aktualizace informací o lodích
+                updateVesselInfo(vesselsData);
+                
+                // Aktualizace tabulky zásob
+                updateInventoryTable(inventoryItems);
+                
+                // Inicializace grafu zásob
+                const chartElement = document.getElementById('inventory-chart');
+                if (chartElement) {
+                    const ctx = chartElement.getContext('2d');
+                    window.inventoryChart = new Chart(ctx, inventoryChartConfig);
                     
-                    // Přidání zvýraznění pro kritické období
-                    const zoneElement = document.createElement('div');
-                    zoneElement.className = 'critical-bar';
-                    zoneElement.style.left = `${zoneX}px`;
-                    zoneElement.style.width = `${weekWidth}px`;
-                    zoneElement.style.backgroundColor = zone.color;
+                    // Zvýraznění kritických období na grafu
+                    const criticalZones = [
+                        { week: 'W17', color: 'rgba(244, 67, 54, 0.2)' },
+                        { week: 'W23', color: 'rgba(244, 67, 54, 0.2)' }
+                    ];
                     
-                    ctx.canvas.parentNode.appendChild(zoneElement);
+                    criticalZones.forEach(zone => {
+                        const weekIndex = inventoryData.labels.indexOf(zone.week);
+                        if (weekIndex !== -1) {
+                            const weekWidth = ctx.canvas.width / inventoryData.labels.length;
+                            const zoneX = weekIndex * weekWidth;
+                            
+                            // Přidání zvýraznění pro kritické období
+                            const zoneElement = document.createElement('div');
+                            zoneElement.className = 'critical-bar';
+                            zoneElement.style.left = `${zoneX}px`;
+                            zoneElement.style.width = `${weekWidth}px`;
+                            zoneElement.style.backgroundColor = zone.color;
+                            
+                            ctx.canvas.parentNode.appendChild(zoneElement);
+                        }
+                    });
+                } else {
+                    console.error('Chart element not found');
                 }
-            });
+                
+                console.log('Application initialization complete');
+            } catch (error) {
+                console.error('Error initializing application:', error);
+                // Zobrazení chybové zprávy uživateli
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'error-message';
+                errorMessage.innerHTML = `
+                    <h3>Došlo k chybě při načítání aplikace</h3>
+                    <p>Zkuste stránku obnovit nebo kontaktujte správce systému.</p>
+                    <p><small>Detaily chyby: ${error.message}</small></p>
+                `;
+                document.body.prepend(errorMessage);
+            }
         });
+        
+        // Záložní řešení pro případ, že by DOMContentLoaded již proběhl
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            console.log('Document already loaded, setting up tab switching directly');
+            setupTabSwitching();
+        }
