@@ -940,5 +940,56 @@
 
     </script>
     <script src="ship-tracking.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('inventory-chart');
+  if (!canvas) return;                     // bezpečnostní kontrola
+
+  const data = {
+    labels: ['W14','W15','W16','W17','W18','W19','W20','W21','W22','W23','W24'],
+    datasets: [
+      {
+        label: 'Stav zásob',
+        data: [4000, 3500, 6500, 2713, 11200, 9000, 10000, 11500, 4200, 2784, 5000],
+        borderColor: '#1a87d5',
+        backgroundColor: 'rgba(26,135,213,.08)',
+        borderWidth: 3,
+        pointRadius: 5,
+        tension: .3
+      },
+      {
+        label: 'Plánovaná produkce',
+        data: [11500,10800,8500,6500,4000,9500,10500,10000,9000,9500,8500],
+        borderColor: '#ff7300',
+        backgroundColor: 'rgba(255,115,0,.05)',
+        borderWidth: 3,
+        pointRadius: 5,
+        tension: .2
+      },
+      {
+        label: 'Kritická úroveň (6 000 t)',
+        data: Array(11).fill(6000),
+        borderColor: '#f44336',
+        borderDash: [5,5],
+        pointRadius: 0,
+        borderWidth: 2,
+        fill: false
+      }
+    ]
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, max: 12000, ticks: { stepSize: 3000 } }
+    }
+  };
+
+  const ctx = canvas.getContext('2d');
+  window.inventoryChart = new Chart(ctx, { type: 'line', data, options });
+});
+</script>
 </body>
 </html>
