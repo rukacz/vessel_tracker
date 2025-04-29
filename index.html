@@ -17,7 +17,7 @@
             color: #333;
         }
         .container {
-            max-width: 1400px;
+            max-width: 1400;
             margin: 0 auto;
             padding: 20px;
         }
@@ -1023,7 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const ctx = canvas.getContext('2d');
-  window.inventoryChart = new Chart(ctx, { type: 'line', data, options });
+  window.inventoryChart = new Chart(ctx, { type: 'line', data, options,plugins: [criticalPoints] });
 });
 </script>
 </body>
