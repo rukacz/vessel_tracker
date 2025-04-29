@@ -72,7 +72,7 @@ let shipMarkers = {};
 // Funkce volaná po načtení DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
   initMap();
-  
+  fillLegacyPlaceholders();
   // Aktualizace grafu, pokud je k dispozici
   if (window.updateInventoryChart) {
     window.updateInventoryChart(materialsData);
