@@ -2,7 +2,7 @@
 const shipsData = [
   {
     name: "FLAMINGO 1",
-    position: [19.44661, 57.47127],
+    position: [19.66614, 57.71341],
     color: "#ff7043",
     imo: "IMO 9474199",
     status: "Underway using engine",
@@ -15,7 +15,7 @@ const shipsData = [
   },
   {
     name: "PELIKAN",
-    position: [24.12094, 58.04735],
+    position: [24.20157, 58.07892],
     color: "#42a5f5",
     imo: "IMO (neznámé)",
     status: "Plánovaná nakládka",
@@ -28,7 +28,7 @@ const shipsData = [
   },
   {
     name: "HARMONY",
-    position: [37.24649, 5.36620],
+    position: [36.82753, 1.58455],
     color: "#66bb6a",
     imo: "IMO 9449522",
     status: "Underway - pod Sardinií",
