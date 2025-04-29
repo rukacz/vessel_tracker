@@ -511,149 +511,235 @@
 
         
     <!-- Obsah pro kritické období W17 -->
-    <div class="period-content active" id="w17-content">
-        <div class="metrics-container">
-            <div class="metric-card danger">
-                <div class="metric-value">2 713 t</div>
-                <div class="metric-label">Minimální stav zásob</div>
-                <div class="metric-date">21.4.2025</div>
-            </div>
-            <div class="metric-card warning">
-                <div class="metric-value">6 000 t</div>
-                <div class="metric-label">Bezpečná úroveň zásob</div>
-                <div class="metric-info">Minimální množství pro plynulý provoz</div>
-            </div>
-            <div class="metric-card info">
-                <div class="metric-value">3 287 t</div>
-                <div class="metric-label">Deficit zásob</div>
-                <div class="metric-info">Množství potřebné k pokrytí rizika</div>
-            </div>
-        </div>
-
-        <div class="analysis-container">
-            <div class="analysis-card">
-                <h3>Analýza rizika</h3>
-                <p><strong>Příčiny kritického stavu:</strong></p>
-                <ul>
-                    <li>Zpoždění dodávky materiálu HADEED 3 z lodi HARMONY</li>
-                    <li>Zvýšená spotřeba materiálu v období 15.4. - 20.4.2025</li>
-                    <li>Nejistý termín doplutí lodi HARMONY do přístavu Swinoujscie</li>
-                </ul>
-                <p><strong>Navrhovaná opatření:</strong></p>
-                <ul>
-                    <li>Zajistit prioritní vykládku lodi HARMONY ihned po připlutí</li>
-                    <li>Připravit záložní železniční kapacity pro urychlený transport materiálu do Ostravy</li>
-                    <li>Dočasně omezit výrobu energeticky náročných produktů</li>
-                </ul>
-            </div>
-        </div>
-
-        <h3>Časová osa klíčových událostí</h3>
-        <div class="timeline-container">
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-date">8.4.2025</div>
-                    <div class="timeline-content">
-                        <h4>Odplutí HARMONY z přístavu Fujairah</h4>
-                        <p>Náklad: Bramy HADEED 3</p>
+            <div id="period-w17" class="period-content active">
+                <div class="metric-container">
+                    <div class="metric-card danger">
+                        <h4>Minimální stav zásob</h4>
+                        <div class="metric-value">2 713 tun</div>
+                        <div class="metric-change negative">-54.8% oproti bezpečné úrovni</div>
+                    </div>
+                    <div class="metric-card warning">
+                        <h4>Datum kritického stavu</h4>
+                        <div class="metric-value">21.4.2025</div>
+                        <div class="metric-change">Týden W17</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Potřebné pro bezpečný provoz</h4>
+                        <div class="metric-value">6 000 tun</div>
+                        <div class="metric-change">Minimum pro plynulou výrobu</div>
                     </div>
                 </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">21.4.2025</div>
-                    <div class="timeline-content warning">
-                        <h4>Kritický stav zásob</h4>
-                        <p>Předpokládaný pokles na 2 713 tun</p>
-                    </div>
+                
+                <div class="alert-card critical">
+                    <h3>Analýza rizika - Týden W17</h3>
+                    <p>V týdnu W17 dochází k velmi kritickému poklesu zásob bram na pouhých 2 713 tun, což je hluboko pod minimální bezpečnou úrovní 6 000 tun. Tento stav nastává z důvodu zpoždění dodávek z lodi HARMONY (Hadeed III), která má předpokládanou ETA v přístavu 30.4.2025.</p>
+                    <p>Situace vyžaduje okamžitou akci:</p>
+                    <ul>
+                        <li>Zkrácení výrobního plánu a snížení výkonu</li>
+                        <li>Urychlení železniční dopravy zbývajícího materiálu z přístavu</li>
+                        <li>Příprava alternativních dodavatelů</li>
+                    </ul>
                 </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">1.5.2025</div>
-                    <div class="timeline-content">
-                        <h4>Očekávaný příjezd HARMONY do Swinoujscie</h4>
-                        <p>Náklad: 2 500 tun Bramy HADEED 3</p>
+                
+                <h3>Časová osa dodávek - Období A</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Evraz 3 - Příjezd do přístavu Gdynia</h4>
+                            <p>Loď SAKAR dorazila do přístavu Gdynia s nákladem 20 900 tun bram.</p>
+                            <p><strong>Datum:</strong> 29.3.2025</p>
+                        </div>
                     </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">3.5.2025</div>
-                    <div class="timeline-content">
-                        <h4>Transport materiálu do Ostravy</h4>
-                        <p>Předpokládaná doba transportu: 2 dny</p>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Transport do Ostravy - První část</h4>
+                            <p>První transport materiálu z přístavu Gdynia do Ostravy - 3 000 tun.</p>
+                            <p><strong>Datum:</strong> 14.4.2025 - 16.4.2025</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Obsah pro kritické období W23 -->
-    <div class="period-content" id="w23-content">
-        <div class="metrics-container">
-            <div class="metric-card danger">
-                <div class="metric-value">2 784 t</div>
-                <div class="metric-label">Minimální stav zásob</div>
-                <div class="metric-date">2.6.2025</div>
-            </div>
-            <div class="metric-card warning">
-                <div class="metric-value">6 000 t</div>
-                <div class="metric-label">Bezpečná úroveň zásob</div>
-                <div class="metric-info">Minimální množství pro plynulý provoz</div>
-            </div>
-            <div class="metric-card info">
-                <div class="metric-value">3 216 t</div>
-                <div class="metric-label">Deficit zásob</div>
-                <div class="metric-info">Množství potřebné k pokrytí rizika</div>
-            </div>
-        </div>
-
-        <div class="analysis-container">
-            <div class="analysis-card">
-                <h3>Analýza rizika</h3>
-                <p><strong>Příčiny kritického stavu:</strong></p>
-                <ul>
-                    <li>Odložení nakládky materiálu HADEED 5 v přístavu Fujairah</li>
-                    <li>Změna dodavatele z původního GALAXY na PELIKAN</li>
-                    <li>Prodloužení dodací lhůty o 14 dní</li>
-                </ul>
-                <p><strong>Navrhovaná opatření:</strong></p>
-                <ul>
-                    <li>Urgovat potvrzení změny lodě s přístavem Swinoujscie</li>
-                    <li>Zajistit přepravní kapacity pro okamžitý transport po vykládce</li>
-                    <li>Projednat možnost dílčí dodávky materiálu letecky pro kritické komponenty</li>
-                </ul>
-            </div>
-        </div>
-
-        <h3>Časová osa klíčových událostí</h3>
-        <div class="timeline-container">
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-date">15.5.2025</div>
-                    <div class="timeline-content">
-                        <h4>Plánované odplutí PELIKAN z přístavu Fujairah</h4>
-                        <p>Náklad: Bramy HADEED 5</p>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Transport do Ostravy - Druhá část</h4>
+                            <p>Druhý transport materiálu z přístavu Gdynia do Ostravy - 3 000 tun.</p>
+                            <p><strong>Datum:</strong> 17.4.2025 - 19.4.2025</p>
+                        </div>
                     </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">2.6.2025</div>
-                    <div class="timeline-content warning">
-                        <h4>Kritický stav zásob</h4>
-                        <p>Předpokládaný pokles na 2 784 tun</p>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
+                            <p>Stav zásob klesá na kritických 2 713 tun, což ohrožuje kontinuitu výroby.</p>
+                            <p><strong>Datum:</strong> 21.4.2025 (Týden W17)</p>
+                        </div>
                     </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">12.6.2025</div>
-                    <div class="timeline-content">
-                        <h4>Očekávaný příjezd PELIKAN do Swinoujscie</h4>
-                        <p>Náklad: 1 500 tun Bramy HADEED 5</p>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Transport do Ostravy - Třetí část</h4>
+                            <p>Třetí transport materiálu z přístavu Gdynia do Ostravy - 3 000 tun.</p>
+                            <p><strong>Datum:</strong> 19.4.2025 - 21.4.2025</p>
+                        </div>
                     </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-date">14.6.2025</div>
-                    <div class="timeline-content">
-                        <h4>Transport materiálu do Ostravy</h4>
-                        <p>Předpokládaná doba transportu: 2 dny</p>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed III - Očekávaný příjezd</h4>
+                            <p>Loď HARMONY s nákladem Hadeed III má dorazit do přístavu. Tato dodávka je klíčová pro překonání kritického období.</p>
+                            <p><strong>Datum (ETA):</strong> 30.4.2025</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            
+            <div id="period-w23" class="period-content">
+                <div class="metric-container">
+                    <div class="metric-card danger">
+                        <h4>Minimální stav zásob</h4>
+                        <div class="metric-value">2 784 tun</div>
+                        <div class="metric-change negative">-53.6% oproti bezpečné úrovni</div>
+                    </div>
+                    <div class="metric-card warning">
+                        <h4>Datum kritického stavu</h4>
+                        <div class="metric-value">2.6.2025</div>
+                        <div class="metric-change">Týden W23</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Potřebné pro bezpečný provoz</h4>
+                        <div class="metric-value">6 000 tun</div>
+                        <div class="metric-change">Minimum pro plynulou výrobu</div>
+                    </div>
+                </div>
+                
+                <div class="alert-card critical">
+                    <h3>Analýza rizika - Týden W23</h3>
+                    <p>V týdnu W23 očekáváme opět kritický pokles zásob bram na pouhých 2 784 tun, což je podobně kritická situace jako v týdnu W17. Tento stav nastává po vyčerpání materiálu z dodávky Hadeed III a před příjezdem dostatečných dodávek z lodi Hadeed IV.</p>
+                    <p>Doporučená opatření:</p>
+                    <ul>
+                        <li>Optimalizace výrobního plánu tak, aby větší část výroby spadala mimo kritické období</li>
+                        <li>Zajištění pohotovostního plánu pro urychlený transport materiálu z lodi Hadeed IV</li>
+                        <li>Možnost distribuce materiálu z jiných výrobních závodů Liberty</li>
+                    </ul>
+                </div>
+                
+                <h3>Časová osa dodávek - Období B</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed III - Poslední dodávka</h4>
+                            <p>Poslední část materiálu z lodi Hadeed III je transportována do Ostravy - 3 141 tun.</p>
+                            <p><strong>Datum:</strong> 20.5.2025 - 22.5.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed IV - Příjezd do přístavu</h4>
+                            <p>Loď VANGUARD s nákladem Hadeed IV připluje do přístavu.</p>
+                            <p><strong>Datum (ETA):</strong> 28.5.2025 - 30.5.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
+                            <p>Stav zásob klesá na kritických 2 784 tun, hluboko pod bezpečnou úrovní.</p>
+                            <p><strong>Datum:</strong> 2.6.2025 (Týden W23)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed IV - První transport</h4>
+                            <p>První část materiálu z lodi Hadeed IV dorazí do Ostravy - 6 000 tun.</p>
+                            <p><strong>Datum:</strong> 5.6.2025 - 7.6.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-chart-line" style="color: #4caf50;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Obnovení bezpečné úrovně zásob</h4>
+                            <p>Stav zásob se postupně vrací nad bezpečnou úroveň 6 000 tun díky dodávkám z lodi Hadeed IV.</p>
+                            <p><strong>Datum:</strong> 10.6.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Evraz V - Očekávaný příjezd</h4>
+                            <p>Plánovaný příjezd lodi s dodávkou Evraz V, která zajistí stabilizaci zásob pro letní období.</p>
+                            <p><strong>Datum (ETA):</strong> 20.6.2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed III - Poslední dodávka</h4>
+                            <p>Poslední část materiálu z lodi Hadeed III je transportována do Ostravy - 3 141 tun.</p>
+                            <p><strong>Datum:</strong> 20.5.2025 - 22.5.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed IV - Příjezd do přístavu</h4>
+                            <p>Loď VANGUARD s nákladem Hadeed IV připluje do přístavu.</p>
+                            <p><strong>Datum (ETA):</strong> 28.5.2025 - 30.5.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
+                            <p>Stav zásob klesá na kritických 2 784 tun, hluboko pod bezpečnou úrovní.</p>
+                            <p><strong>Datum:</strong> 2.6.2025 (Týden W23)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed IV - První transport</h4>
+                            <p>První část materiálu z lodi Hadeed IV dorazí do Ostravy - 6 000 tun.</p>
+                            <p><strong>Datum:</strong> 5.6.2025 - 7.6.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-chart-line" style="color: #4caf50;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Obnovení bezpečné úrovně zásob</h4>
+                            <p>Stav zásob se postupně vrací nad bezpečnou úroveň 6 000 tun díky dodávkám z lodi Hadeed IV.</p>
+                            <p><strong>Datum:</strong> 10.6.2025</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Evraz V - Očekávaný příjezd</h4>
+                            <p>Plánovaný příjezd lodi s dodávkou Evraz V, která zajistí stabilizaci zásob pro letní období.</p>
+                            <p><strong>Datum (ETA):</strong> 20.6.2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
     </div>
     
