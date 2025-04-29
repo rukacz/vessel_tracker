@@ -220,6 +220,7 @@ function fillLegacyPlaceholders() {
     set('status',       `Status: ${ship.status}`);
     set('destination',  `Cíl: ${ship.destination}`);
     set('eta',          `ETA: ${ship.eta}`);
+    set('cargo',       `Náklad: ${ship.cargo}`);
   });
 }
 
