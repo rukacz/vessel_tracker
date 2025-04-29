@@ -994,17 +994,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const ctx    = chart.ctx;
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
-      const points = [
-        { week:'W17', color:'#f44336', label:'A' },
-        { week:'W23', color:'#ff9800', label:'B' }
-      ];
+      const lbls   = chart.data.labels;
 
-      points.forEach(p => {
-        const idx = labels.indexOf(p.week);
-        if (idx === -1) return;
-        const yVal = chart.data.datasets[0].data[idx];   // hodnoty zásob
-        const x    = xScale.getPixelForValue(idx);
-        const y    = yScale.getPixelForValue(yVal);
+    [
+      { week: 'W17', color: '#f44336', label: 'A' },
+      { week: 'W23', color: '#ff9800', label: 'B' }
+    ].forEach(p => {
+      const idx = lbls.indexOf(p.week);
+      if (idx === -1) return;                     // pro jistotu
+
+      const yVal = chart.data.datasets[0].data[idx];
+      const x    = xScale.getPixelForValue(idx);
+      const y    = yScale.getPixelForValue(yVal);
 
         // kolečko
         ctx.beginPath();
