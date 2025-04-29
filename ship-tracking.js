@@ -205,6 +205,24 @@ function updateShipCards() {
   }
 }
 
+/* === doplněk pro staré placeholdery v HTML === */
+function fillLegacyPlaceholders() {
+  shipsData.forEach(ship => {
+    const base = ship.name.toLowerCase().replace(/\s+/g, '-');
+
+    const set = (suffix, txt) => {
+      const el = document.getElementById(`${base}-${suffix}`);
+      if (el) el.textContent = txt;
+    };
+
+    set('position',
+        `Pozice: ${ship.position[0].toFixed(4)}° N, ${ship.position[1].toFixed(4)}° E`);
+    set('status',       `Status: ${ship.status}`);
+    set('destination',  `Cíl: ${ship.destination}`);
+    set('eta',          `ETA: ${ship.eta}`);
+  });
+}
+
 // Funkce pro naplnění tabulky se zásobami
 function fillInventoryTable() {
   const inventoryTable = document.getElementById('inventory-table');
