@@ -987,6 +987,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  /* ---- PLUGIN pro kritické body ---- */
+  const criticalPoints = {
+    id: 'criticalPoints',
+    afterDraw(chart) {
+      const ctx    = chart.ctx;
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      const points = [
+        { week:'W17', color:'#f44336', label:'A' },
+        { week:'W23', color:'#ff9800', label:'B' }
+      ];
+
+      points.forEach(p => {
+        const idx = labels.indexOf(p.week);
+        if (idx === -1) return;
+        const yVal = chart.data.datasets[0].data[idx];   // hodnoty zásob
+        const x    = xScale.getPixelForValue(idx);
+        const y    = yScale.getPixelForValue(yVal);
+
+        // kolečko
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, 2*Math.PI);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        // písmeno
+        ctx.fillStyle = '#fff';
+        ctx.font      = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.label, x, y);
+      });
+    }
+  };
+
   const ctx = canvas.getContext('2d');
   window.inventoryChart = new Chart(ctx, { type: 'line', data, options });
 });
