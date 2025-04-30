@@ -28,7 +28,7 @@ const shipsData = [
   },
   {
     name: "HARMONY",
-    position: [36.82753, 1.58455],
+    position: [36.18681, -2,37967],
     color: "#66bb6a",
     imo: "IMO 9449522",
     status: "Underway - pod Sardinií",
