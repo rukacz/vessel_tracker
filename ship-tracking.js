@@ -5,7 +5,7 @@ const shipsData = [
     position: [19.66614, 57.71341],
     color: "#ff7043",
     imo: "IMO 9474199",
-    status: "Underway using engine",
+    status: "V přístavu, operuje",
     destination: "Szczecin, Poland",
     eta: "2025-05-28",
     course: 0,
