@@ -117,12 +117,12 @@ function displayShips() {
     const popupContent = `
       <div class="ship-popup">
         <h3>${ship.name}</h3>
-        <p><strong>${ship.imo}</strong></p>
-        <p><strong>Status:</strong> ${ship.status}</p>
+        // <p><strong>${ship.imo}</strong></p>
+        // <p><strong>Status:</strong> ${ship.status}</p>
         <p><strong>Cargo:</strong> ${ship.cargo}</p>
         <p><strong>Loading port:</strong> ${ship.loadingPort}</p>
         <p><strong>Destination:</strong> ${ship.destination}</p>
-        <p><strong>ETA:</strong> ${ship.eta}</p>
+        // <p><strong>ETA:</strong> ${ship.eta}</p>
         <p><strong>Course/Speed:</strong> ${ship.course}° / ${ship.speed} knots</p>
       </div>
     `;
