@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sledování lodí a stavu zásob</title>
+    <link rel="icon" href="data:,">
+    <!-- Externí styly (Leaflet a FontAwesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1400;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #1a4f8a;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .tab.active {
+            background-color: #1a4f8a;
+            color: white;
+            border-color: #1a4f8a;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .map-container {
+            flex: 1 1 700px;
+        }
+        .inventory-container {
+            flex: 1 1 400px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        #map {
+	    width: 100%;
+            height: 600px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .dashboard {
+            margin-top: 20px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .vessel-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .vessel-card {
+            flex: 1 1 300px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #1a4f8a;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+	.spacer {display:none;
+	} 
+        .vessel-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1a4f8a;
+        }
+	.line-chart-card{ 
+		padding: 12px 18px 0;
+		border:1px solid #e7eaf1;  /* volitelné, zjemní přechod */
+ 		border-radius:6px;
+	}
+        .vessel-card p {
+            margin: 5px 0;
+        }
+        .vessel-card.flamingo { border-left-color: #ff7043; }
+        .vessel-card.pelikan { border-left-color: #42a5f5; }
+        .vessel-card.harmony { border-left-color: #66bb6a; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th {
+            background-color: #f2f2f2;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .status-low {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .status-medium {
+            color: #ff9800;
+        }
+        .status-high {
+            color: #4caf50;
+        }
+        .update-info {
+            margin-top: 10px;
+            text-align: right;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 22px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding:10px 18px 12px;
+        }
+        .chart-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-title i {
+            margin-right: 10px;
+            color: #1a4f8a;
+        }
+        .chart-title h3 {
+            margin: 0;
+            color: #1a4f8a;
+        }
+	.timeline-card{                /* přidáš tuto třídu na 2. .chart-container */
+	padding:12px 18px 8px;
+	margin-top:12px
+	margin-bottom:22px
+        }
+        .top-chart-legend {
+	    position:absolute;
+	    left:18px;               /* zarovnáno se středem grafu */
+	    right:18px;
+	    bottom:4px;             /* těsně pod osou X */
+	    background:rgba(255,255,255,.85);
+	    padding:2px 6px;
+	    border-radius:3px;
+	    font-size:13px;
+        }
+        .legend-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+        }
+        .legend-item, .legend-critical-point {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            margin-right: 5px;
+            white-space: nowrap;
+        }
+        .legend-color {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        .legend-critical-point-icon {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 9px;
+        }
+        .divider {
+            height: 14px;
+            width: 1px;
+            background-color: #ccc;
+            margin: 0 5px;
+        }
+        .timeline-grid {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .timeline-grid-header, .timeline-grid-row {
+            display: flex;
+            align-items: center;
+        }
+        .timeline-grid-header {
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .timeline-grid-cell {
+            flex: 1;
+            min-width: 50px;
+            text-align: center;
+            padding: 0 2px;
+        }
+        .timeline-grid-row-label {
+            width: 120px;
+            flex-shrink: 0;
+            text-align: left;
+            font-weight: bold;
+        }
+        .timeline-grid-row-content {
+            display: flex;
+            flex: 1;
+        }
+        .timeline-grid-week {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            min-height: 25px;
+        }
+        .timeline-event-port i, .timeline-event-transport i, .warning-icon {
+            color: #1a4f8a;
+        }
+        .timeline-event-port i {
+            color: #1a87d5;
+        }
+        .timeline-event-transport i {
+            color: #4caf50;
+        }
+        .timeline-critical-area {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background-color: rgba(244, 67, 54, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .warning-label {
+            font-weight: bold;
+            color: white;
+        }
+        .period-a {
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+        .period-b {
+            background-color: rgba(255, 152, 0, 0.2);
+        }
+        .timeline-legend {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            justify-content: center;
+	    margin: 6px 0 2px;
+        }
+        .timeline-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .timeline-color {
+            width: 20px;
+            height: 3px;
+        }
+        .alert-card {
+            background-color: #fff3e0;
+            border-left: 5px solid #ff9800;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .alert-card.critical {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+        }
+        .alert-card h3 {
+            margin-top: 0;
+            color: #e65100;
+        }
+        .alert-card.critical h3 {
+            color: #c62828;
+        }
+        .period-selector {
+  	    display:flex;
+	    gap:4px;
+	    margin-bottom:20px;
+	    margin-top:18px;
+        }
+        .period-button {
+  	    padding:8px 18px;
+	    border:1px solid #cbd5e1;
+	    background:#fff;
+	    color:#000;
+	    font-weight:600;
+	    border-radius:4px;
+	    cursor:pointer;
+	    transition:all .2s ease;
+        }
+	.period-button:hover{background:#f1f5f9;
+	}
+        .period-button.active {
+   	  background:#064f7d;   /* tmavě modrá */
+  	  color:#fff;
+  	  border-color:#064f7d;
+        }
+        .period-content {
+            display: none;
+        }
+        .period-content.active {
+            display: block;
+        }
+        .metric-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            flex: 1;
+            min-width: 250px;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .metric-card.danger {
+            background-color: #fff5f5;
+            border-left: 5px solid #dc3545;
+        }
+        .metric-card.warning {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffc107;
+        }
+        .metric-card.info {
+            background-color: #f0f7ff;
+            border-left: 5px solid #0d6efd;
+        }
+        .metric-card h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #343a40;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            color: #343a40;
+        }
+        .metric-change {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .timeline {
+            position: relative;
+            margin: 30px 0;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #ddd;
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+        }
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+        .timeline-icon {
+            position: absolute;
+            left: -30px;
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #1a4f8a;
+            color: #1a4f8a;
+            font-size: 1.2rem;
+        }
+        .timeline-icon i[style*="color: #f44336"] {
+            /* Keep the red color for critical icons */
+            color: #f44336;
+        }
+        .timeline-content {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .timeline-title {
+            margin-top: 0;
+            color: #1a4f8a;
+        }
+        .risk-indicator {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+            color: white;
+        }
+        .risk-high {
+            background-color: #f44336;
+        }
+	.map-container{min-width:100%;    /* rodič musí mít šířku */
+	}  
+	.timeline-grid-week{
+	    flex:1;
+	    min-width:60px;            /* aby text W14… seděl */
+	    height:34px;
+	    display:flex;
+	    align-items:center;
+	    justify-content:center;
+	    border-radius:4px;
+	    position:relative;
+	}
+
+	/* barvy buněk */
+	.timeline-grid-week.port      {background:#0d6efd; color:#fff;}  /* příjezd – modrá */
+	.timeline-grid-week.transport {background:#28a745; color:#fff;}  /* transport – zelená */
+
+	/* kritická orámování */
+	.timeline-grid-week.critical-a{box-shadow:0 0 0 3px #dc3545 inset;}
+	.timeline-grid-week.critical-b{box-shadow:0 0 0 3px #ffa000 inset;}
+
+	/* popisek A / B uvnitř buňky */
+	.warning-label{
+	    position:absolute; bottom:2px; right:4px;	
+	    font-size:11px; font-weight:700;
+	    background:rgba(0,0,0,.25); color:#fff;
+	    padding:0 2px; border-radius:2px;
+	    line-height:1;
+	}
+	#line-chart,
+	#line-chart + canvas,
+	.line-chart-card canvas{ 
+	    height: 280px !important;                      /* dřív 400–420 px */
+	    padding-bottom: 0 !important;                  /* zrušit 36 px, co jsme přidali */	
+	    background:#fff;       /* nově přidáno */
+	}
+	#map{min-width:100%;min-height:520px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sledování lodí a stavu zásob</h1>
+        </header>
+        <div class="tabs">
+            <div class="tab active" data-tab="ships" onclick="switchTab('ships')">Aktuální poloha lodí</div>
+            <div class="tab" data-tab="critical" onclick="switchTab('critical')">Stav zásob</div>
+        </div>
+        <div id="ships-tab" class="tab-content active">
+            <div class="main-content">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="dashboard">
+                        <h2>Aktuální poloha lodí</h2>
+                        <div class="vessel-info">
+                            <div class="vessel-card flamingo">
+                                <h3>FLAMINGO 1</h3>
+                                <p id="flamingo-1-position">Pozice: Načítání...</p>
+                                <p id="flamingo-1-status">Status: Načítání...</p>
+                                <p id="flamingo-1-destination">Cíl: Načítání...</p>
+                                <p id="flamingo-1-eta">ETA: Načítání...</p>
+                                <p id="flamingo-1-cargo">Náklad: Načítání...</p>				    
+                            </div>
+                            <div class="vessel-card pelikan">
+                                <h3>PELIKAN</h3>
+                                <p id="pelikan-position">Pozice: Načítání...</p>
+                                <p id="pelikan-status">Status: Načítání...</p>
+                                <p id="pelikan-destination">Cíl: Načítání...</p>
+                                <p id="pelikan-eta">ETA: Načítání...</p>
+                                <p id="pelikan-cargo">Náklad: Načítání...</p>				    
+                            </div>
+                            <div class="vessel-card harmony">
+                                <h3>HARMONY</h3>
+                                <p id="harmony-position">Pozice: Načítání...</p>
+                                <p id="harmony-status">Status: Načítání...</p>
+                                <p id="harmony-destination">Cíl: Načítání...</p>
+                                <p id="harmony-eta">ETA: Načítání...</p>
+                                <p id="harmony-cargo">Náklad: Načítání...</p>				    
+                            </div>
+                        </div>
+                        <div class="update-info" id="last-update">
+                            Poslední aktualizace: --
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="critical-tab" class="tab-content">
+            <div class="alert-card critical">
+                <h3><i class="fas fa-exclamation-triangle"></i> Upozornění: Riziko zastavení výroby</h3>
+                <p>Identifikována dvě kritická období, kdy stav zásob klesá pod úroveň 6 000 tun, což je minimální bezpečná hladina pro zajištění plynulého provozu výroby.</p>
+            </div>
+          <div class="period-selector">
+                <button class="period-button active" data-period="w17" onclick="switchPeriod('w17')">Kritické období A (W17)</button>
+                <button class="period-button" data-period="w23" onclick="switchPeriod('w23')">Kritické období B (W23)</button>
+            </div>
+            <div id="period-w17" class="period-content active">
+                <div class="metric-container">
+                    <div class="metric-card danger">
+                        <h4>Minimální stav zásob</h4>
+                        <div class="metric-value">2 713 tun</div>
+                        <div class="metric-change negative">-54,8% oproti bezpečné úrovni</div>
+                    </div>
+                    <div class="metric-card warning">
+                        <h4>Datum kritického stavu</h4>
+                        <div class="metric-value">21.4.2025</div>
+                        <div class="metric-change">Týden W17</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Potřebné pro bezpečný provoz</h4>
+                        <div class="metric-value">6 000 tun</div>
+                        <div class="metric-change">Minimum pro plynulou výrobu</div>
+                    </div>
+                </div>
+                <div class="alert-card critical">
+                    <h3>Analýza rizika - Týden W17</h3>
+                    <p>V týdnu W17 dochází k velmi kritickému poklesu zásob bram na pouhých 2 713 tun, což je hluboko pod minimální bezpečnou úrovní 6 000 tun. Tento stav nastává z důvodu zpoždění dodávek z lodi HARMONY (Hadeed III), která má předpokládanou ETA v přístavu 30.4.2025.</p>
+                    <p>Situace vyžaduje okamžitou akci:</p>
+                    <ul>
+                        <li>Zkrácení výrobního plánu a snížení výkonu</li>
+                        <li>Urychlení železniční dopravy zbývajícího materiálu z přístavu</li>
+                        <li>Příprava alternativních dodavatelů</li>
+                    </ul>
+                </div>
+                <h3>Časová osa dodávek - Období A</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Evraz 3 - Příjezd do přístavu Gdynia</h4>
+                            <p>Loď SAKAR dorazila do přístavu Gdynia s nákladem 20 900 tun bram.</p>
+                            <p><strong>Datum:</strong> 29.3.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Transport do Ostravy - První část</h4>
+                            <p>První transport materiálu z přístavu Gdynia do Ostravy – 3 000 tun.</p>
+                            <p><strong>Datum:</strong> 14.4.2025 – 16.4.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Transport do Ostravy - Druhá část</h4>
+                            <p>Druhý transport materiálu z přístavu Gdynia do Ostravy – 3 000 tun.</p>
+                            <p><strong>Datum:</strong> 17.4.2025 – 19.4.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
+                            <p>Stav zásob klesá na kritických 2 713 tun, což ohrožuje kontinuitu výroby.</p>
+                            <p><strong>Datum:</strong> 21.4.2025 (Týden W17)</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Transport do Ostravy - Třetí část</h4>
+                            <p>Třetí transport materiálu z přístavu Gdynia do Ostravy – 3 000 tun.</p>
+                            <p><strong>Datum:</strong> 19.4.2025 – 21.4.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed III - Očekávaný příjezd</h4>
+                            <p>Loď HARMONY s nákladem Hadeed III má dorazit do přístavu. Tato dodávka je klíčová pro překonání kritického období.</p>
+                            <p><strong>Datum (ETA):</strong> 30.4.2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="period-w23" class="period-content">
+                <div class="metric-container">
+                    <div class="metric-card danger">
+                        <h4>Minimální stav zásob</h4>
+                        <div class="metric-value">2 784 tun</div>
+                        <div class="metric-change negative">-53,6% oproti bezpečné úrovni</div>
+                    </div>
+                    <div class="metric-card warning">
+                        <h4>Datum kritického stavu</h4>
+                        <div class="metric-value">2.6.2025</div>
+                        <div class="metric-change">Týden W23</div>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Potřebné pro bezpečný provoz</h4>
+                        <div class="metric-value">6 000 tun</div>
+                        <div class="metric-change">Minimum pro plynulou výrobu</div>
+                    </div>
+                </div>
+                <div class="alert-card critical">
+                    <h3>Analýza rizika - Týden W23</h3>
+                    <p>V týdnu W23 očekáváme opět kritický pokles zásob bram na pouhých 2 784 tun, což je podobně kritická situace jako v týdnu W17. Tento stav nastává po vyčerpání materiálu z dodávky Hadeed III a před příjezdem dostatečných dodávek z lodi Hadeed IV.</p>
+                    <p>Doporučená opatření:</p>
+                    <ul>
+                        <li>Optimalizace výrobního plánu tak, aby větší část výroby spadala mimo kritické období</li>
+                        <li>Zajištění pohotovostního plánu pro urychlený transport materiálu z lodi Hadeed IV</li>
+                        <li>Možnost distribuce materiálu z jiných výrobních závodů Liberty</li>
+                    </ul>
+                </div>
+                <h3>Časová osa dodávek - Období B</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed III - Poslední dodávka</h4>
+                            <p>Poslední část materiálu z lodi Hadeed III je transportována do Ostravy – 3 141 tun.</p>
+                            <p><strong>Datum:</strong> 20.5.2025 – 22.5.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed IV - Příjezd do přístavu</h4>
+                            <p>Loď VANGUARD s nákladem Hadeed IV připluje do přístavu.</p>
+                            <p><strong>Datum (ETA):</strong> 28.5.2025 – 30.5.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-exclamation-triangle" style="color: #f44336;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">KRITICKÝ STAV ZÁSOB <span class="risk-indicator risk-high">VYSOKÉ RIZIKO</span></h4>
+                            <p>Stav zásob klesá na kritických 2 784 tun, hluboko pod bezpečnou úrovní.</p>
+                            <p><strong>Datum:</strong> 2.6.2025 (Týden W23)</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-train"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Hadeed IV - První transport</h4>
+                            <p>První část materiálu z lodi Hadeed IV dorazí do Ostravy – 6 000 tun.</p>
+                            <p><strong>Datum:</strong> 5.6.2025 – 7.6.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-chart-line" style="color: #4caf50;"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Obnovení bezpečné úrovně zásob</h4>
+                            <p>Stav zásob se postupně vrací nad bezpečnou úroveň 6 000 tun díky dodávkám z lodi Hadeed IV.</p>
+                            <p><strong>Datum:</strong> 10.6.2025</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon"><i class="fas fa-ship"></i></div>
+                        <div class="timeline-content">
+                            <h4 class="timeline-title">Evraz V - Očekávaný příjezd</h4>
+                            <p>Plánovaný příjezd lodi s dodávkou Evraz V, která zajistí stabilizaci zásob pro letní období.</p>
+                            <p><strong>Datum (ETA):</strong> 20.6.2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <div class="chart-container">
+		<div class="chart-container line-chart-card">
+                <div class="chart-title">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Inventory Slabs Ostrava/trains</h3>
+                </div>
+                <canvas id="inventory-chart"></canvas>
+                <div class="top-chart-legend">
+                    <!-- První řádek legendy -->
+                    <div class="legend-row">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #1a87d5; height: 3px;"></div>
+                            <span>Stav zásob</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #ff7300; height: 3px;"></div>
+                            <span>Plánovaná produkce</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #f44336; height: 2px; border-style: dashed; border-width: 1px;"></div>
+                            <span>Kritická úroveň (6 000 t)</span>
+                        </div>
+                    </div>
+                    <!-- Druhý řádek legendy -->
+                    <div class="legend-row">
+                        <div class="legend-critical-point">
+                            <div class="legend-critical-point-icon" style="background-color: #f44336;">A</div>
+                            <span>Kritické období W17</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="legend-critical-point">
+                            <div class="legend-critical-point-icon" style="background-color: #ff9800;">B</div>
+                            <span>Kritické období W23</span>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="chart-container">
+<div class="chart-container timeline-card">
+                <div class="chart-title">
+                    <i class="fas fa-clock"></i>
+                    <h3>Časová osa dodávek materiálu</h3>
+                </div>
+ <div class="timeline-grid">
+    <!-- HLAVIČKA -->
+    <div class="timeline-grid-header">
+        <div class="timeline-grid-cell" style="width:120px;">Dodávka</div>
+        <div class="timeline-grid-cell">W14</div><div class="timeline-grid-cell">W15</div>
+        <div class="timeline-grid-cell">W16</div><div class="timeline-grid-cell">W17</div>
+        <div class="timeline-grid-cell">W18</div><div class="timeline-grid-cell">W19</div>
+        <div class="timeline-grid-cell">W20</div><div class="timeline-grid-cell">W21</div>
+        <div class="timeline-grid-cell">W22</div><div class="timeline-grid-cell">W23</div>
+        <div class="timeline-grid-cell">W24</div>
+    </div>
+
+    <!-- =============  EVRAZ III  ============= -->
+    <div class="timeline-grid-row">
+        <div class="timeline-grid-row-label">Evraz III</div>
+        <div class="timeline-grid-row-content">
+            <div class="timeline-grid-week port"><i class="fas fa-ship"></i></div>         <!-- W14 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div>   <!-- W15 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div>   <!-- W16 -->
+            <div class="timeline-grid-week transport critical-a">
+                <i class="fas fa-train"></i><span class="warning-label">A</span>
+            </div>                                                                         <!-- W17 -->
+            <div class="timeline-grid-week"></div><!-- W18 -->
+            <div class="timeline-grid-week"></div><!-- W19 -->
+            <div class="timeline-grid-week"></div><!-- W20 -->
+            <div class="timeline-grid-week"></div><!-- W21 -->
+            <div class="timeline-grid-week"></div><!-- W22 -->
+            <div class="timeline-grid-week"></div><!-- W23 -->
+            <div class="timeline-grid-week"></div><!-- W24 -->
+        </div>
+    </div>
+
+    <!-- =============  EVRAZ IV  ============= -->
+    <div class="timeline-grid-row">
+        <div class="timeline-grid-row-label">Evraz IV</div>
+        <div class="timeline-grid-row-content">
+            <div class="timeline-grid-week"></div><!-- W14 -->
+            <div class="timeline-grid-week"></div><!-- W15 -->
+            <div class="timeline-grid-week"></div><!-- W16 -->
+            <div class="timeline-grid-week port"><i class="fas fa-ship"></i></div><!-- W17 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W18 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W19 -->
+            <div class="timeline-grid-week"></div><!-- W20 -->
+            <div class="timeline-grid-week"></div><!-- W21 -->
+            <div class="timeline-grid-week"></div><!-- W22 -->
+            <div class="timeline-grid-week"></div><!-- W23 -->
+            <div class="timeline-grid-week"></div><!-- W24 -->
+        </div>
+    </div>
+
+    <!-- =============  HADEED III  ============= -->
+    <div class="timeline-grid-row">
+        <div class="timeline-grid-row-label">Hadeed III</div>
+        <div class="timeline-grid-row-content">
+            <div class="timeline-grid-week"></div><!-- W14 -->
+            <div class="timeline-grid-week"></div><!-- W15 -->
+            <div class="timeline-grid-week"></div><!-- W16 -->
+            <div class="timeline-grid-week"></div><!-- W17 -->
+            <div class="timeline-grid-week"></div><!-- W18 -->
+            <div class="timeline-grid-week port"><i class="fas fa-ship"></i></div><!-- W19 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W20 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W21 -->
+            <div class="timeline-grid-week transport critical-b">
+                <i class="fas fa-train"></i><span class="warning-label">B</span>
+            </div><!-- W22 -->
+            <div class="timeline-grid-week"></div><!-- W23 -->
+            <div class="timeline-grid-week"></div><!-- W24 -->
+        </div>
+    </div>
+
+    <!-- =============  HADEED IV  ============= -->
+    <div class="timeline-grid-row">
+        <div class="timeline-grid-row-label">Hadeed IV</div>
+        <div class="timeline-grid-row-content">
+            <div class="timeline-grid-week"></div><!-- W14 -->
+            <div class="timeline-grid-week"></div><!-- W15 -->
+            <div class="timeline-grid-week"></div><!-- W16 -->
+            <div class="timeline-grid-week"></div><!-- W17 -->
+            <div class="timeline-grid-week"></div><!-- W18 -->
+            <div class="timeline-grid-week"></div><!-- W19 -->
+            <div class="timeline-grid-week"></div><!-- W20 -->
+            <div class="timeline-grid-week"></div><!-- W21 -->
+            <div class="timeline-grid-week port"><i class="fas fa-ship"></i></div><!-- W22 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W23 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W24 -->
+        </div>
+    </div>
+
+    <!-- =============  EVRAZ V  ============= -->
+    <div class="timeline-grid-row">
+        <div class="timeline-grid-row-label">Evraz V</div>
+        <div class="timeline-grid-row-content">
+            <div class="timeline-grid-week"></div><!-- W14 -->
+            <div class="timeline-grid-week"></div><!-- W15 -->
+            <div class="timeline-grid-week"></div><!-- W16 -->
+            <div class="timeline-grid-week"></div><!-- W17 -->
+            <div class="timeline-grid-week"></div><!-- W18 -->
+            <div class="timeline-grid-week"></div><!-- W19 -->
+            <div class="timeline-grid-week"></div><!-- W20 -->
+            <div class="timeline-grid-week"></div><!-- W21 -->
+            <div class="timeline-grid-week"></div><!-- W22 -->
+            <div class="timeline-grid-week port"><i class="fas fa-ship"></i></div><!-- W23 -->
+            <div class="timeline-grid-week transport"><i class="fas fa-train"></i></div><!-- W24 -->
+        </div>
+    </div>
+</div>
+                <div class="timeline-legend">
+                    <div class="timeline-legend-item">
+                        <div class="timeline-color" style="background-color: #1a87d5;"></div>
+                        <span>Příjezd do přístavu</span>
+                    </div>
+                    <div class="timeline-legend-item">
+                        <div class="timeline-color" style="background-color: #4caf50;"></div>
+                        <span>Transport do Ostravy</span>
+                    </div>
+                    <div class="timeline-legend-item">
+                        <div class="timeline-color" style="background-color: #f44336; border-style: dashed;"></div>
+                        <span>Kritické období A (W17-W18)</span>
+                    </div>
+                    <div class="timeline-legend-item">
+                        <div class="timeline-color" style="background-color: #ff9800; border-style: dashed;"></div>
+                        <span>Kritické období B (W23-W24)</span>
+                    </div>
+                </div>
+            </div>
+            </div>
+  
+    </div>
+    <!-- Externí skripty (Leaflet a Chart.js) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // Funkce pro přepínání záložek
+        function switchTab(tabId) {
+            // Deaktivace všech záložek a jejich obsahů
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            // Aktivace zvolené záložky a jejího obsahu
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId + '-tab').classList.add('active');
+            // Pokud je to záložka lodí s mapou nebo záložka s grafem, obnovit zobrazení
+            if (tabId === 'ships' && window.map) {
+                window.map.invalidateSize();
+		setTimeout(()=>window.map.invalidateSize(),0);
+            } else if (tabId === 'critical' && window.inventoryChart) {
+                window.inventoryChart.update();
+            }
+        }
+        // Funkce pro přepínání mezi kritickými obdobími
+        function switchPeriod(periodId) {
+            document.querySelectorAll('.period-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.period-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.period-button[data-period="${periodId}"]`).classList.add('active');
+            document.getElementById('period-' + periodId).classList.add('active');
+        }
+
+    </script>
+    <script src="ship-tracking.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('inventory-chart');
+  if (!canvas) return;                     // bezpečnostní kontrola
+
+  const data = {
+    labels: ['W14','W15','W16','W17','W18','W19','W20','W21','W22','W23','W24'],
+    datasets: [
+      {
+        label: 'Stav zásob',
+        data: [4000, 3500, 6500, 2713, 11200, 9000, 10000, 11500, 4200, 2784, 5000],
+        borderColor: '#1a87d5',
+        backgroundColor: 'rgba(26,135,213,.08)',
+        borderWidth: 3,
+        pointRadius: 5,
+        tension: .3
+      },
+      {
+        label: 'Plánovaná produkce',
+        data: [11500,10800,8500,6500,4000,9500,10500,10000,9000,9500,8500],
+        borderColor: '#ff7300',
+        backgroundColor: 'rgba(255,115,0,.05)',
+        borderWidth: 3,
+        pointRadius: 5,
+        tension: .2
+      },
+      {
+        label: 'Kritická úroveň (6 000 t)',
+        data: Array(11).fill(6000),
+        borderColor: '#f44336',
+        borderDash: [5,5],
+        pointRadius: 0,
+        borderWidth: 2,
+        fill: false
+      }
+    ]
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, max: 12000, ticks: { stepSize: 3000 } }
+    }
+  };
+
+  /* ---- PLUGIN pro kritické body ---- */
+  const criticalPoints = {
+    id: 'criticalPoints',
+    afterDraw(chart) {
+      const ctx    = chart.ctx;
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      const lbls   = chart.data.labels;
+
+    [
+      { week: 'W17', color: '#f44336', label: 'A' },
+      { week: 'W23', color: '#ff9800', label: 'B' }
+    ].forEach(p => {
+      const idx = lbls.indexOf(p.week);
+      if (idx === -1) return;                     // pro jistotu
+
+      const yVal = chart.data.datasets[0].data[idx];
+      const x    = xScale.getPixelForValue(idx);
+      const y    = yScale.getPixelForValue(yVal);
+
+        // kolečko
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, 2*Math.PI);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+
+        // písmeno
+        ctx.fillStyle = '#fff';
+        ctx.font      = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.label, x, y);
+      });
+    }
+  };
+
+  const ctx = canvas.getContext('2d');
+  window.inventoryChart = new Chart(ctx, { type: 'line', data, options,plugins: [criticalPoints] });
+});
+</script>
+</body>
+</html>
