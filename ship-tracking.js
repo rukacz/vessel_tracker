@@ -31,7 +31,7 @@ const shipsData = [
     position: [36.18681, -2,37967],
     color: "#66bb6a",
     imo: "IMO 9449522",
-    status: "Underway - pod Sardinií",
+    status: "Underway - před Gibraltarem",
     destination: "Swinoujscie, Poland",
     eta: "2025-05-08",
     course: 0,
